@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 tracks = []
 track_id = 0
-with open("/home/jamilya/Desktop/mpd/event.txt", "r") as f:
+with open("event.txt", "r") as f:
     for i in f:
         temp = []
         tracks.append([])
@@ -55,7 +55,7 @@ print(len(tracks_df['theta'].unique()))
 #print(tracks[2])
 #-----------------------------------------------
 
-tracks_df.to_csv('/home/jamilya/Desktop/mpd/Tracks.csv')
+tracks_df.to_csv('Tracks.csv')
 
 
 #--------------------REGRESSION---------------------
