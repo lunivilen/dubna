@@ -1,5 +1,6 @@
 import pyqtgraph.opengl as gl
 import PyQt6.QtWidgets as pqg
+from PyQt6 import QtGui
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 import numpy as np
@@ -10,6 +11,13 @@ def merge_tracks(track_one, track_two):
     for point in track_two:
         if point not in track_one:
             track_one.append(point)
+    return track_one
+
+
+def separate_tracks(track_one, track_two):
+    for point in track_two:
+        if point in track_one:
+            track_two.remove(point)
     return track_one
 
 
@@ -54,6 +62,16 @@ while i < len(tracks):
         j += 1
     i += 1
 
+# Separate tracks
+i = 0
+while i < len(tracks):
+    for j in range(i + 1, len(tracks)):
+        tracks[i] = separate_tracks(tracks[i], tracks[j])
+    if not tracks[i] or len(tracks[i]) < 5:
+        tracks.pop(i)
+    else:
+        i += 1
+
 # Sort the hits in the correct order after merge
 for i in range(len(tracks)):
     df = pd.DataFrame(tracks[i], columns=[0, 1, 2])
@@ -68,12 +86,6 @@ for i in range(len(tracks)):
         tracks[i] = list(df.sort_values(2, ascending=True).values)
     tracks[i] = list(map(list, tracks[i]))
 
-with open("new_event.txt", "w") as f:
-    for i in tracks:
-        for j in i:
-            for k in j:
-                f.write(str(k) + ", ")
-        f.write("\n")
 # Discard all characteristics of hits, except for coordinates
 tracks_new = []
 indexes = []
@@ -117,6 +129,11 @@ graphs.setData(nodePositions=np.array(tracks_new),
                edgeWidth=2)
 plot.addItem(graphs)
 
+# for i in range(len(tracks)):
+#     if len(tracks[i]) < 3:
+#         text = gl.GLTextItem(text=str(i), parentItem=graphs, pos=tracks[i][-1], font=QtGui.QFont('Helvetica', 8),
+#                              color=QColor(Qt.GlobalColor.red))
+#         plot.addItem(text)
 plot.show()
 
 if __name__ == '__main__':
