@@ -5,13 +5,19 @@ from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 import numpy as np
 import pandas as pd
+from time import time
+import math
 
 
 def merge_tracks(track_one, track_two):
-    for point in track_two:
-        if point not in track_one:
-            track_one.append(point)
-    return track_one
+    similarity_factor = 0.5
+    temp_mas = track_one + track_two
+    unique = list(np.unique(temp_mas))
+    difference = len(temp_mas) - len(unique)
+    if difference / len(track_two) > similarity_factor:
+        return unique, True
+    else:
+        return track_one, False
 
 
 def separate_tracks(track_one, track_two):
@@ -21,9 +27,11 @@ def separate_tracks(track_one, track_two):
     return track_one
 
 
+start = time()
 # Breaking tracks from a file into separate hits
 tracks = []
 track_id = 0
+# ================= Get data from file =================
 with open("event0.txt", "r") as f:
     for i in f:
         temp = []
@@ -33,7 +41,7 @@ with open("event0.txt", "r") as f:
         j = 0
         while j < len(mas):
             if amount_characteristics != 10:
-                if amount_characteristics != 0 and amount_characteristics != 1 and len(temp) < 3:
+                if amount_characteristics != 0 and amount_characteristics != 1:
                     temp.append(float(mas[j]))
                 amount_characteristics += 1
                 j += 1
@@ -47,34 +55,74 @@ with open("event0.txt", "r") as f:
             amount_characteristics = 0
         track_id += 1
 
-# Merge same tracks
-similarity_factor = 0.4
+# ================= Cleaning =================
+print(f"Before merging there are {len(tracks)} tracks")
+
+# Speed up
+hits = {}
+for i in range(len(tracks)):
+    for j in range(len(tracks[i])):
+        s = math.prod(tracks[i][j][:3])
+        hits[s] = tracks[i][j]
+        tracks[i][j] = s
+
+print("Starting the first stage of merging")
+start = time()
+# The first merging stage
 i = 0
 while i < len(tracks):
     j = 0
-    while j < len(tracks):
+    while j < len(tracks) and i < len(tracks):
         if tracks[j][0] in tracks[i] and i != j:
-            temp_mas = tracks[i] + tracks[j]
-            if len(temp_mas) / len(np.unique(temp_mas)) > similarity_factor:
-                tracks[i] = merge_tracks(tracks[i], tracks[j])
+            tracks[i], check = merge_tracks(tracks[i], tracks[j])
+            if check:
                 tracks.pop(j)
                 j -= 1
         j += 1
     i += 1
+
+print(f"The first stage of merging completed in {time() - start} seconds")
+print("Starting the second stage of merging")
+start = time()
+i = 0
+# The second merging stage
+while i < len(tracks):
+    j = 0
+    while j < len(tracks) and i < len(tracks):
+        if i != j:
+            tracks[i], check = merge_tracks(tracks[i], tracks[j])
+            if check:
+                tracks.pop(j)
+                j -= 1
+        j += 1
+    i += 1
+
+print(f"The second stage of merging completed in {time() - start} seconds")
+print("Starting split tracks")
+start = time()
 
 # Separate tracks
 i = 0
 while i < len(tracks):
     for j in range(i + 1, len(tracks)):
         tracks[i] = separate_tracks(tracks[i], tracks[j])
-    if not tracks[i] or len(tracks[i]) < 5:
+    if not tracks[i]:
         tracks.pop(i)
     else:
         i += 1
+print(f"Track splitting completed in {time() - start} seconds")
+
+# Return to x,y,z and etc.
+for i in range(len(tracks)):
+    for j in range(len(tracks[i])):
+        tracks[i][j] = hits[tracks[i][j]]
+
+print("Staring sorting the points in the track")
+start = time()
 
 # Sort the hits in the correct order after merge
 for i in range(len(tracks)):
-    df = pd.DataFrame(tracks[i], columns=[0, 1, 2])
+    df = pd.DataFrame(tracks[i], columns=[0, 1, 2, 3, 4, 5, 6, 7])
     scatter_x = df[0].max() - df[0].min()
     scatter_y = df[1].max() - df[1].min()
     scatter_z = df[2].max() - df[2].min()
@@ -85,7 +133,18 @@ for i in range(len(tracks)):
     else:
         tracks[i] = list(df.sort_values(2, ascending=True).values)
     tracks[i] = list(map(list, tracks[i]))
+print(f"Sorting completed in {time() - start} seconds")
 
+print(f"After merging there are {len(tracks)} tracks")
+
+# Saving new tracks
+with open("new_event.txt", "w") as f:
+    for track in tracks:
+        for hit in track:
+            for characteristic in hit:
+                f.write(str(characteristic) + ", ")
+        f.write("\n")
+# ================= Visualizing =================
 # Discard all characteristics of hits, except for coordinates
 tracks_new = []
 indexes = []
@@ -128,12 +187,6 @@ graphs.setData(nodePositions=np.array(tracks_new),
                nodeColor=QColor(Qt.GlobalColor.gray),
                edgeWidth=2)
 plot.addItem(graphs)
-
-# for i in range(len(tracks)):
-#     if len(tracks[i]) < 3:
-#         text = gl.GLTextItem(text=str(i), parentItem=graphs, pos=tracks[i][-1], font=QtGui.QFont('Helvetica', 8),
-#                              color=QColor(Qt.GlobalColor.red))
-#         plot.addItem(text)
 plot.show()
 
 if __name__ == '__main__':
