@@ -15,9 +15,11 @@ def merge_tracks(track_one, track_two):
     unique = list(np.unique(temp_mas))
     difference = len(temp_mas) - len(unique)
     if difference / len(track_two) > similarity_factor:
-        return unique, True
+        return unique, 1
+    elif difference / len(track_one) > similarity_factor:
+        return unique, 2
     else:
-        return track_one, False
+        return [], 0
 
 
 def separate_tracks(track_one, track_two):
@@ -41,7 +43,7 @@ with open("event0.txt", "r") as f:
         j = 0
         while j < len(mas):
             if amount_characteristics != 10:
-                if amount_characteristics != 0 and amount_characteristics != 1:
+                if amount_characteristics != 0:
                     temp.append(float(mas[j]))
                 amount_characteristics += 1
                 j += 1
@@ -62,7 +64,7 @@ print(f"Before merging there are {len(tracks)} tracks")
 hits = {}
 for i in range(len(tracks)):
     for j in range(len(tracks[i])):
-        s = math.prod(tracks[i][j][:3])
+        s = tracks[i][j][0]
         hits[s] = tracks[i][j]
         tracks[i][j] = s
 
@@ -71,13 +73,19 @@ start = time()
 # The first merging stage
 i = 0
 while i < len(tracks):
-    j = 0
+    j = i + 1
     while j < len(tracks) and i < len(tracks):
         if tracks[j][0] in tracks[i] and i != j:
-            tracks[i], check = merge_tracks(tracks[i], tracks[j])
-            if check:
+            merged_track, number = merge_tracks(tracks[i], tracks[j])
+            if number == 1:
+                tracks[i] = merged_track
                 tracks.pop(j)
                 j -= 1
+            elif number == 2:
+                tracks[j] = merged_track
+                tracks.pop(i)
+                i -= 1
+                break
         j += 1
     i += 1
 
@@ -87,13 +95,19 @@ start = time()
 i = 0
 # The second merging stage
 while i < len(tracks):
-    j = 0
+    j = i + 1
     while j < len(tracks) and i < len(tracks):
         if i != j:
-            tracks[i], check = merge_tracks(tracks[i], tracks[j])
-            if check:
+            merged_track, number = merge_tracks(tracks[i], tracks[j])
+            if number == 1:
+                tracks[i] = merged_track
                 tracks.pop(j)
                 j -= 1
+            elif number == 2:
+                tracks[j] = merged_track
+                tracks.pop(i)
+                i -= 1
+                break
         j += 1
     i += 1
 
@@ -122,19 +136,19 @@ start = time()
 
 # Sort the hits in the correct order after merge
 for i in range(len(tracks)):
-    df = pd.DataFrame(tracks[i], columns=[0, 1, 2, 3, 4, 5, 6, 7])
-    scatter_x = df[0].max() - df[0].min()
-    scatter_y = df[1].max() - df[1].min()
-    scatter_z = df[2].max() - df[2].min()
+    df = pd.DataFrame(tracks[i], columns=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+    scatter_x = df[1].max() - df[1].min()
+    scatter_y = df[2].max() - df[2].min()
+    scatter_z = df[3].max() - df[3].min()
     if max(scatter_x, scatter_y, scatter_z) == scatter_x:
-        tracks[i] = list(df.sort_values(0, ascending=True).values)
-    elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
         tracks[i] = list(df.sort_values(1, ascending=True).values)
-    else:
+    elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
         tracks[i] = list(df.sort_values(2, ascending=True).values)
+    else:
+        tracks[i] = list(df.sort_values(3, ascending=True).values)
     tracks[i] = list(map(list, tracks[i]))
-print(f"Sorting completed in {time() - start} seconds")
 
+print(f"Sorting completed in {time() - start} seconds")
 print(f"After merging there are {len(tracks)} tracks")
 
 # Saving new tracks
@@ -153,9 +167,9 @@ j = 0
 for track_num in range(len(tracks)):
     indexes.append([])
     for hit in range(len(tracks[track_num])):
-        x = tracks[track_num][hit][0]
-        y = tracks[track_num][hit][1]
-        z = tracks[track_num][hit][2]
+        x = tracks[track_num][hit][1]
+        y = tracks[track_num][hit][2]
+        z = tracks[track_num][hit][3]
         tracks_new.append([x, y, z])
         if hit != 0 and hit != len(tracks[track_num]) - 1:
             indexes[i].extend([j, j])
