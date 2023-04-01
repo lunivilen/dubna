@@ -20,7 +20,5 @@ def get_data(path):
                     amount_characteristics = 0
             if j == amount_characteristics:
                 tracks[track_id].append(temp)
-                temp = []
-                amount_characteristics = 0
             track_id += 1
     return tracks

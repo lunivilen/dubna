@@ -1,12 +1,14 @@
-from get_data import get_data
-from cleaning import cleaning
 from visualizing import visualizing
 from save_data import save_data
+from get_data import get_data
+from cleaning import cleaning
+from merging import merging
 
 tracks = get_data("event.txt")
 tracks = cleaning(tracks)
-save_data(tracks)
-app = visualizing(tracks)
+tracks = merging(tracks)
+# save_data(tracks)
+app = visualizing(tracks, show_tracks_indexes=False)
 
 if __name__ == '__main__':
     app.exec()

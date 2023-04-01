@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 
-def merge_tracks(track_one, track_two):
+def merge_tracks(track_one: list, track_two: list):
     similarity_factor = 0.5
     temp_mas = np.concatenate((track_one, track_two))
     unique = np.unique(temp_mas)
@@ -16,14 +16,28 @@ def merge_tracks(track_one, track_two):
         return [], 0
 
 
-def separate_tracks(track_one, track_two):
+def separate_tracks(track_one: list, track_two: list):
     for point in track_two:
         if point in track_one:
             track_two.remove(point)
     return track_one
 
 
-def cleaning(tracks):
+def sort_hits(track):
+    df = pd.DataFrame(track, columns=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+    scatter_x = df[1].max() - df[1].min()
+    scatter_y = df[2].max() - df[2].min()
+    scatter_z = df[3].max() - df[3].min()
+    if max(scatter_x, scatter_y, scatter_z) == scatter_x:
+        track = list(df.sort_values(1, ascending=True).values)
+    elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
+        track = list(df.sort_values(2, ascending=True).values)
+    else:
+        track = list(df.sort_values(3, ascending=True).values)
+    return list(map(list, track))
+
+
+def cleaning(tracks: list):
     print(f"Before cleaning there are {len(tracks)} tracks")
 
     # Speed up
@@ -34,7 +48,7 @@ def cleaning(tracks):
             hits[s] = tracks[i][j]
             tracks[i][j] = s
 
-    print("Starting the first stage of merging")
+    print("Starting the first stage of merging duplicates")
     start = time()
     # The first merging stage
     i = 0
@@ -56,7 +70,7 @@ def cleaning(tracks):
         i += 1
 
     print(f"The first stage of merging completed in {time() - start} seconds")
-    print("Starting the second stage of merging")
+    print("Starting the second stage of merging duplicates")
     start = time()
     i = 0
     # The second merging stage
@@ -84,8 +98,9 @@ def cleaning(tracks):
     # Separate tracks
     i = 0
     while i < len(tracks):
-        for j in range(i + 1, len(tracks)):
-            tracks[i] = separate_tracks(tracks[i], tracks[j])
+        for j in range(len(tracks)):
+            if i != j:
+                tracks[i] = separate_tracks(tracks[i], tracks[j])
         if not tracks[i]:
             tracks.pop(i)
         else:
@@ -102,17 +117,7 @@ def cleaning(tracks):
 
     # Sort the hits in the correct order after merge
     for i in range(len(tracks)):
-        df = pd.DataFrame(tracks[i], columns=[0, 1, 2, 3, 4, 5, 6, 7, 8])
-        scatter_x = df[1].max() - df[1].min()
-        scatter_y = df[2].max() - df[2].min()
-        scatter_z = df[3].max() - df[3].min()
-        if max(scatter_x, scatter_y, scatter_z) == scatter_x:
-            tracks[i] = list(df.sort_values(1, ascending=True).values)
-        elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
-            tracks[i] = list(df.sort_values(2, ascending=True).values)
-        else:
-            tracks[i] = list(df.sort_values(3, ascending=True).values)
-        tracks[i] = list(map(list, tracks[i]))
+        tracks[i] = sort_hits(tracks[i])
 
     print(f"Sorting completed in {time() - start} seconds")
     print(f"After cleaning there are {len(tracks)} tracks")

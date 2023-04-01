@@ -1,11 +1,12 @@
 import pyqtgraph.opengl as gl
 import PyQt6.QtWidgets as pqg
+from PyQt6 import QtGui
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 import numpy as np
 
 
-def visualizing(tracks):
+def visualizing(tracks: list, show_tracks_indexes=False):
     # Discard all characteristics of hits, except for coordinates
     tracks_new = []
     indexes = []
@@ -48,6 +49,12 @@ def visualizing(tracks):
                    nodeColor=QColor(Qt.GlobalColor.gray),
                    edgeWidth=2)
     plot.addItem(graphs)
+
+    if show_tracks_indexes:
+        for i in range(len(tracks)):
+            text = gl.GLTextItem(text=str(i), parentItem=graphs, pos=tracks[i][0][1:4],
+                                 font=QtGui.QFont('Helvetica', 14), color=QColor(Qt.GlobalColor.red))
+            plot.addItem(text)
     plot.show()
 
     return app
