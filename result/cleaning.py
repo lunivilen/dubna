@@ -98,8 +98,9 @@ def cleaning(tracks: list):
     # Separate tracks
     i = 0
     while i < len(tracks):
-        for j in range(i + 1, len(tracks)):
-            tracks[i] = separate_tracks(tracks[i], tracks[j])
+        for j in range(len(tracks)):
+            if i != j:
+                tracks[i] = separate_tracks(tracks[i], tracks[j])
         if not tracks[i]:
             tracks.pop(i)
         else:

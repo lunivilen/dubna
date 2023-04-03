@@ -9,8 +9,9 @@ def get_data(path):
             amount_characteristics = 0
             j = 0
             while j < len(mas):
-                if amount_characteristics != 9:
-                    temp.append(float(mas[j]))
+                if amount_characteristics != 10:
+                    if amount_characteristics != 0:
+                        temp.append(float(mas[j]))
                     amount_characteristics += 1
                     j += 1
                 else:
