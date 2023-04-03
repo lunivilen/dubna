@@ -92,15 +92,14 @@ def cleaning(tracks: list):
         i += 1
 
     print(f"The second stage of merging completed in {time() - start} seconds")
-    print("Starting split tracks")
+    print("Starting separate tracks")
     start = time()
 
     # Separate tracks
     i = 0
     while i < len(tracks):
-        for j in range(len(tracks)):
-            if i != j:
-                tracks[i] = separate_tracks(tracks[i], tracks[j])
+        for j in range(i + 1, len(tracks)):
+            tracks[i] = separate_tracks(tracks[i], tracks[j])
         if not tracks[i]:
             tracks.pop(i)
         else:
@@ -121,4 +120,4 @@ def cleaning(tracks: list):
 
     print(f"Sorting completed in {time() - start} seconds")
     print(f"After cleaning there are {len(tracks)} tracks")
-    return tracks
+    return sorted(tracks, key=len)

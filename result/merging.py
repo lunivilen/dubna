@@ -5,7 +5,7 @@ import math
 
 
 def get_vector(hit_1, hit_2):
-    return np.array([hit_1[0] - hit_2[0], hit_1[1] - hit_2[1], hit_1[2] - hit_2[2]])
+    return np.array([hit_2[0] - hit_1[0], hit_2[1] - hit_1[1], hit_2[2] - hit_1[2]])
 
 
 def angle_between_vec(v1, v2):
@@ -30,49 +30,73 @@ def check_direction(track_one, track_two):
 
 
 def average_vec(hits):
-    vec_1 = get_vector(hits[0], hits[1])
-    vec_2 = get_vector(hits[0], hits[2])
-    vec_3 = get_vector(hits[1], hits[2])
-    vec = np.array([])
-    for i in range(3):
-        vec = np.append(vec, (vec_1[i] + vec_2[i] + vec_3[i]) / 3)
-    return vec
+    vec = np.array([hits[2][0] - hits[0][0], hits[2][1] - hits[0][1], hits[2][2] - hits[0][2]])
+    return vec * 2 / 3
+
+
+def distance_to_line(m0, m1, m_check):
+    ab = m0 - m1
+    ac = m_check - m1
+    d = np.linalg.norm(np.cross(ab, ac)) / np.linalg.norm(ab)
+    return d
 
 
 def merging(tracks: list):
     start = time()
     print("Staring real merging")
     allowable_angle = 160
-    allowable_error = 200
-    allowable_length = 160
+    allowable_error = 700
+    allowable_length = 700
+    allowable_distance = 35
     i = 0
     while i < len(tracks):
         if len(tracks[i]) < 2:
             i += 1
             continue
         j = 0
-        vec_1 = get_vector(tracks[i][0][1:4], tracks[i][1][1:4])
+        # Get vector of the first track
+        if len(tracks[i]) == 2:
+            vec_1 = get_vector(tracks[i][0][1:4], tracks[i][1][1:4])
+        else:
+            vec_1 = average_vec([tracks[i][k][1:4] for k in range(3)])
+
         while j < len(tracks) and i < len(tracks):
             if len(tracks[j]) < 2 or len(tracks[i]) < 2 or i == j:
                 j += 1
                 continue
 
+            # Correcting the direction of the track
             end = -1 if check_direction(tracks[i], tracks[j]) else 0
-            vec_2 = get_vector(tracks[j][end][1:4], tracks[j][end - 1][1:4])
-            angel = angle_between_vec(vec_1, vec_2)
+
+            # Get vector of the second track
+            if len(tracks[j]) == 2:
+                vec_2 = get_vector(tracks[j][end][1:4], tracks[j][end - 1 if end < 0 else end + 1][1:4])
+            else:
+                vec_2 = average_vec([tracks[j][end][1:4],
+                                     tracks[j][end - 1 if end < 0 else end + 1][1:4],
+                                     tracks[j][end - 2 if end < 0 else end + 2][1:4]])
             if angle_between_vec(vec_1, vec_2) < allowable_angle:
                 j += 1
                 continue
+
+            # We build a triangle from the last point of the second vector
+            # and the last two points of the first vector
             vec_a = get_vector(tracks[i][0][1:4], tracks[j][end][1:4])
             vec_b = get_vector(tracks[i][1][1:4], tracks[j][end][1:4])
             s = area_of_triangle(vec_a, vec_b)
             length = get_vector_length(vec_a)
             if s < allowable_error and length < allowable_length:
-                tracks[i].extend(tracks[j])
-                tracks[i] = sort_hits(tracks[i])
-                tracks.pop(j)
-                i -= 1
-                break
+                distance = distance_to_line(np.array(tracks[i][0][1:4]),
+                                            np.array(tracks[i][1][1:4]),
+                                            np.array(tracks[j][end][1:4]))
+                if distance < allowable_distance:
+                    tracks[i].extend(tracks[j])
+                    tracks[i] = sort_hits(tracks[i])
+                    tracks.pop(j)
+                    i -= 1
+                    break
+                else:
+                    j += 1
             else:
                 j += 1
         i += 1
