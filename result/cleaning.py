@@ -104,7 +104,7 @@ def cleaning(tracks: list):
             tracks.pop(i)
         else:
             i += 1
-    print(f"Track splitting completed in {time() - start} seconds")
+    print(f"Track separating completed in {time() - start} seconds")
 
     # Return to x,y,z and etc.
     for i in range(len(tracks)):

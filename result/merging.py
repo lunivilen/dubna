@@ -41,13 +41,9 @@ def distance_to_line(m0, m1, m_check):
     return d
 
 
-def merging(tracks: list):
+def merging(tracks: list, allowable_angle=160, allowable_error=700, allowable_length=700, allowable_distance=35):
     start = time()
     print("Staring real merging")
-    allowable_angle = 160
-    allowable_error = 700
-    allowable_length = 700
-    allowable_distance = 35
     i = 0
     while i < len(tracks):
         if len(tracks[i]) < 2:
