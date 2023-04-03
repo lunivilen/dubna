@@ -5,7 +5,7 @@ from get_data import get_data
 from cleaning import cleaning
 from merging import merging
 
-tracks = get_data("event.txt")
+tracks = get_data("data/event.txt")
 tracks = cleaning(tracks)
 tracks = merging(tracks)
 tracks = remove_emissions(tracks)
