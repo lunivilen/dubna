@@ -5,7 +5,7 @@ import numpy as np
 
 tracks = []
 track_id = 0
-with open("../data/event.txt", "r") as f:
+with open("../data/event0.txt", "r") as f:
     for i in f:
         temp = []
         tracks.append([])

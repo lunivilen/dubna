@@ -101,7 +101,7 @@ def cleaning(tracks: list):
         for j in range(len(tracks)):
             if i != j:
                 tracks[i] = separate_tracks(tracks[i], tracks[j])
-        if not tracks[i]:
+        if len(tracks[i]) < 2:
             tracks.pop(i)
         else:
             i += 1
