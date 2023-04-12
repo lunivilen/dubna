@@ -14,11 +14,6 @@ def angle_between_vec(v1, v2):
     return np.rad2deg(np.arccos(dot_pr / norms))
 
 
-def area_of_triangle(v1, v2):
-    c = [v1[1] * v2[2] - v1[2] * v2[1], v1[0] * v2[2] - v1[2] * v2[0], v1[0] * v2[1] - v1[1] * v2[0]]
-    return get_vector_length(c) / 2
-
-
 def get_vector_length(vec):
     return math.sqrt(vec[0] ** 2 + vec[1] ** 2 + vec[2] ** 2)
 
@@ -78,10 +73,7 @@ def merging(tracks: list, allowable_angle=160, allowable_error=700, allowable_le
             # We build a triangle from the last point of the second vector
             # and the last two points of the first vector
             vec_a = get_vector(tracks[i][0][1:4], tracks[j][end][1:4])
-            vec_b = get_vector(tracks[i][1][1:4], tracks[j][end][1:4])
-            s = area_of_triangle(vec_a, vec_b)
-            length = get_vector_length(vec_a)
-            if s < allowable_error and length < allowable_length:
+            if get_vector_length(vec_a) < allowable_length:
                 distance = distance_to_line(np.array(tracks[i][0][1:4]),
                                             np.array(tracks[i][1][1:4]),
                                             np.array(tracks[j][end][1:4]))

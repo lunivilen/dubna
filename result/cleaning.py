@@ -29,11 +29,11 @@ def sort_hits(track):
     scatter_y = df[2].max() - df[2].min()
     scatter_z = df[3].max() - df[3].min()
     if max(scatter_x, scatter_y, scatter_z) == scatter_x:
-        track = list(df.sort_values(1, ascending=True).values)
+        track = list(df.sort_values(1, ascending=abs(df[1].max()) > abs(df[1].min())).values)
     elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
-        track = list(df.sort_values(2, ascending=True).values)
+        track = list(df.sort_values(2, ascending=abs(df[2].max()) > abs(df[2].min())).values)
     else:
-        track = list(df.sort_values(3, ascending=True).values)
+        track = list(df.sort_values(3, ascending=abs(df[3].max()) > abs(df[3].min())).values)
     return list(map(list, track))
 
 
