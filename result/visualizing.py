@@ -1,7 +1,7 @@
-import pyqtgraph.opengl as gl
-from PyQt6 import QtGui
 from PyQt6.QtGui import QColor
+import pyqtgraph.opengl as gl
 from PyQt6.QtCore import Qt
+from PyQt6 import QtGui
 import numpy as np
 
 
