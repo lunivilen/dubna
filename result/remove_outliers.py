@@ -3,14 +3,19 @@ from scipy.interpolate import RBFInterpolator, BSpline
 from time import time
 import pandas as pd
 import numpy as np
-from scipy import interpolate
 
 
 def remove_outliers(tracks: list):
-    print("Start removing emissions")
+    print("Start removing outliers")
     start = time()
     for track in tracks:
-        df = pd.DataFrame(track, columns=[0, 1, 2, 3, 4, 5, 6, 7, 8])
-        tck, u = interpolate.splprep(np.array([df[1], df[2], df[3]]), s=3)
-    print(f"Removing emissions completed in {time() - start} seconds")
+        i = 0
+        while i < len(track) - 2:
+            vec_1 = get_vector(track[i], track[i + 1])
+            vec_2 = get_vector(track[i], track[i + 2])
+            if get_vector_length(vec_1) > get_vector_length(vec_2)*1.4:
+                track.remove(track[i + 1])
+            else:
+                i += 1
+    print(f"Removing outliers completed in {time() - start} seconds")
     return tracks
