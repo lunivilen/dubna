@@ -1,34 +1,42 @@
-from multiprocessing import Process
-import keyboard
-from time import sleep
-import pyqtgraph.opengl as gl
-import PyQt6.QtWidgets as pqg
+import sys
+
 from PyQt6 import QtGui
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor
-from PyQt6.QtCore import Qt, QMetaObject
+from PyQt6.QtWidgets import QApplication, QWidget
+import pyqtgraph.opengl as gl
 import numpy as np
 
+graphs_1 = gl.GLGraphItem()
+graphs_1.setData(nodePositions=np.array([[1, 2, 3], [6, 5, 4]]))
 
-class App(pqg.QApplication):
-    def __init__(self):
-        pass
-
-
-app = App()
-plot = gl.GLViewWidget()
-graphs = gl.GLAxisItem()
-plot.addItem(graphs)
-plot.show()
+graphs_2 = gl.GLGraphItem()
+graphs_2.setData(nodePositions=np.array([[-1, 2, -3], [6, -5, 4]]),
+                 nodeColor=QColor(Qt.GlobalColor.green))
 
 
-def test():
-    while True:
-        if keyboard.is_pressed('q'):
-            # QMetaObject.invokeMethod(app, )
-            pass
+class MainWindow(gl.GLViewWidget):
+    def __init__(self, axes):
+        self.ax = axes
+        super().__init__()
+
+    def keyPressEvent(self, key: QtGui.QKeyEvent) -> None:
+        try:
+            match key.text():
+                case '1':
+                    self.addItem(self.ax)
+                    self.removeItem(graphs_2)
+                case '2':
+                    self.addItem(graphs_2)
+                    self.removeItem(graphs_1)
+                case '3':
+                    self.clear()
+        except ValueError:
+            print(1)
 
 
 if __name__ == '__main__':
-    t = Process(target=test)
-    t.start()
-    app.exec()
+    app = QApplication(sys.argv)
+    demo = gl.GLViewWidget()
+    demo.show()
+    sys.exit(app.exec())

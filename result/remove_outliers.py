@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-def remove_emissions(tracks: list):
+def remove_outliers(tracks: list):
     print("Start removing emissions")
     start = time()
     allowable_height = 2
