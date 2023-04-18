@@ -1,19 +1,17 @@
-import sys
-
 import pyqtgraph.opengl as gl
-from PyQt6.QtWidgets import QApplication
 from PyQt6 import QtGui
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt
 import numpy as np
 
 
-def data_preparation(data):
+def data_preparation_for_visualizing(data):
     new_data = []
     for tracks in data:
         # Discard all characteristics of hits, except for coordinates
         tracks_new = []
         indexes = []
+        head_indexes = []
         i = 0
         j = 0
         for track_num in range(len(tracks)):
@@ -23,6 +21,9 @@ def data_preparation(data):
                 y = tracks[track_num][hit][2]
                 z = tracks[track_num][hit][3]
                 tracks_new.append([x, y, z])
+                if hit == 0:
+                    head_indexes.append([x, y, z])
+
                 if hit != 0 and hit != len(tracks[track_num]) - 1:
                     indexes[i].extend([j, j])
                 else:
@@ -42,41 +43,41 @@ def data_preparation(data):
         for i in range(len(indexes)):
             if len(indexes[i]) < max_len:
                 indexes[i].extend([indexes[i][-1]] * (max_len - len(indexes[i])))
-        new_data.append([tracks_new, indexes])
+        new_data.append([tracks_new, indexes, head_indexes])
     return new_data
 
 
-def visualizing(tracks_data: list, show_tracks_indexes=False):
-    # Preparing the data
-    data = data_preparation(tracks_data)
-
-    # Draw a graph
-    # if show_tracks_indexes:
-    #     for i in range(len(tracks)):
-    #         text = gl.GLTextItem(text=str(i), parentItem=graphs, pos=tracks[i][0][1:4],
-    #                              font=QtGui.QFont('Helvetica', 14), color=QColor(Qt.GlobalColor.red))
-    #         plot.addItem(text)
-    return data
-
-
 class MainWindow(gl.GLViewWidget):
-    def __init__(self, tracks_data):
+    def __init__(self, tracks_data, show_tracks_indexes=False):
         super().__init__()
-        self.data = tracks_data
-        self.graph = gl.GLGraphItem(nodePositions=np.array(self.data[-1][0]),
-                                    edges=np.array(self.data[-1][1]),
-                                    edgeColor=QColor(Qt.GlobalColor.green),
-                                    nodeColor=QColor(Qt.GlobalColor.gray),
-                                    edgeWidth=2)
-        self.addItem(self.graph)
+        self.data = data_preparation_for_visualizing(tracks_data)
+        self.show_tracks_indexes = show_tracks_indexes
+        self.graph = gl.GLGraphItem()
+        self.show_tracks(-1)
 
     def keyPressEvent(self, key: QtGui.QKeyEvent) -> None:
-        key = key.text()
         try:
-            node_positions = np.array(self.data[int(key) - 1][0])
-            edges_index = np.array(self.data[int(key) - 1][1])
+            self.show_tracks(int(key.text()) - 1)
+        except ValueError:
+            pass
+
+    def show_tracks(self, stage: int):
+        try:
+            node_positions = np.array(self.data[stage][0])
+            edges_index = np.array(self.data[stage][1])
             self.clear()
-            self.graph.setData(nodePositions=node_positions, edges=edges_index)
+            self.graph.setData(nodePositions=node_positions,
+                               edges=edges_index,
+                               edgeColor=QColor(Qt.GlobalColor.green),
+                               nodeColor=QColor(Qt.GlobalColor.gray),
+                               edgeWidth=2)
             self.addItem(self.graph)
-        except (IndexError, ValueError):
+
+            # Indexes
+            if self.show_tracks_indexes:
+                for i in range(len(self.data[stage][2])):
+                    text = gl.GLTextItem(text=str(i), pos=self.data[stage][2][i],
+                                         font=QtGui.QFont('Helvetica', 14), color=QColor(Qt.GlobalColor.red))
+                    self.addItem(text)
+        except IndexError:
             pass
