@@ -16,11 +16,11 @@ result.append(merging(list(map(lambda x: x.copy(), result[1])),
                       allowable_length=700,
                       allowable_distance=35))
 result.append(remove_outliers(list(map(lambda x: x.copy(), result[2]))))
-result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=200))
+result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=150))
 # save_data(tracks)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    plot = MainWindow(result, False)
+    plot = MainWindow(result)
     plot.show()
     sys.exit(app.exec())

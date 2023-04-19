@@ -8,8 +8,10 @@ def smoothing(tracks: list, smooth_scale):
     print("Start smoothing")
     start = time()
     for track_id in range(len(tracks)):
-        if len(tracks[track_id]) < 6:
+        points_quantity = len(tracks[track_id])
+        if points_quantity < 6:
             continue
+            
         df = pd.DataFrame(tracks[track_id], columns=[0, 1, 2, 3, 4, 5, 6, 7, 8])
         x = np.array(df[1])
         y = np.array(df[2])

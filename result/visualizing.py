@@ -48,23 +48,32 @@ def data_preparation_for_visualizing(data):
 
 
 class MainWindow(gl.GLViewWidget):
-    def __init__(self, tracks_data, show_tracks_indexes=False):
+    def __init__(self, tracks_data):
         super().__init__()
+        self.stage = -1
         self.data = data_preparation_for_visualizing(tracks_data)
-        self.show_tracks_indexes = show_tracks_indexes
+        self.is_indexes_showed = False
         self.graph = gl.GLGraphItem()
-        self.show_tracks(-1)
+        self.show_tracks()
 
     def keyPressEvent(self, key: QtGui.QKeyEvent) -> None:
         try:
-            self.show_tracks(int(key.text()) - 1)
+            if key.text() == '0' and self.is_indexes_showed:
+                self.is_indexes_showed = False
+                self.show_tracks()
+            elif key.text() == '0':
+                self.is_indexes_showed = True
+                self.show_indexes()
+            else:
+                self.stage = int(key.text()) - 1
+                self.show_tracks()
         except ValueError:
             pass
 
-    def show_tracks(self, stage: int):
+    def show_tracks(self):
         try:
-            node_positions = np.array(self.data[stage][0])
-            edges_index = np.array(self.data[stage][1])
+            node_positions = np.array(self.data[self.stage][0])
+            edges_index = np.array(self.data[self.stage][1])
             self.clear()
             self.graph.setData(nodePositions=node_positions,
                                edges=edges_index,
@@ -73,11 +82,13 @@ class MainWindow(gl.GLViewWidget):
                                edgeWidth=2)
             self.addItem(self.graph)
 
-            # Indexes
-            if self.show_tracks_indexes:
-                for i in range(len(self.data[stage][2])):
-                    text = gl.GLTextItem(text=str(i), pos=self.data[stage][2][i],
-                                         font=QtGui.QFont('Helvetica', 14), color=QColor(Qt.GlobalColor.red))
-                    self.addItem(text)
+            if self.is_indexes_showed:
+                self.show_indexes()
         except IndexError:
             pass
+
+    def show_indexes(self):
+        for i in range(len(self.data[self.stage][2])):
+            text = gl.GLTextItem(text=str(i), pos=self.data[self.stage][2][i],
+                                 font=QtGui.QFont('Helvetica', 14), color=QColor(Qt.GlobalColor.red))
+            self.addItem(text)
