@@ -16,7 +16,7 @@ result.append(merging(list(map(lambda x: x.copy(), result[1])),
                       allowable_length=700,
                       allowable_distance=35))
 result.append(remove_outliers(list(map(lambda x: x.copy(), result[2]))))
-result.append(smoothing(list(map(lambda x: x.copy(), result[3]))))
+result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=200))
 # save_data(tracks)
 
 if __name__ == '__main__':
