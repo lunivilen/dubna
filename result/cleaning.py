@@ -122,3 +122,33 @@ def cleaning(tracks: list):
     print(f"Sorting completed in {time() - start} seconds")
     print(f"After cleaning there are {len(tracks)} tracks")
     return sorted(tracks, key=len)
+
+
+
+
+
+
+
+
+
+
+                
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
