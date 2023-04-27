@@ -131,4 +131,5 @@ def process_tracks(tracks: list):
     
     tracks_to_unite = get_connected_components(graph_to_unite)
 
-    return tracks_to_unite, graph_to_separate
+    return tracks_dict, tracks_to_unite, graph_to_separate
+
