@@ -50,7 +50,7 @@ def count_tracks_intersections(all_tracks: dict):
         for point in track: 
             point_id = point[0]
             if point_id in intersections:
-                update_intersections(
+                update_tracks_intersections(
                     intersections_count,
                     tracks_graph,
                     intersections[point_id],
@@ -89,10 +89,10 @@ def divide_tracks_graph(
                 separate_edges.add(edge)
 
         if len(unite_edges):
-            groups_to_unite[vertex] = unite_edges
+            graph_to_unite[vertex] = unite_edges
 
         if len(separate_edges):
-            groups_to_separate[vertex] = separate_edges
+            graph_to_separate[vertex] = separate_edges
 
     return graph_to_unite, graph_to_separate
 
@@ -112,24 +112,44 @@ def get_connected_components(graph: dict):
     connected_components = []
     for vertex in graph.keys():
         if vertex not in all_visited:
-            visited = dfs(vertex, vertex)
+            visited = dfs(graph, vertex)
             connected_components.append(visited)
             all_visited.union(visited)
     return connected_components
 
 
 def process_tracks(tracks: list):
+    #print("Track presentation:")
+    #print(tracks[0])
+
     tracks_dict = to_dict(tracks)
+    #print("Track dict:")
+    #print(next(iter(tracks_dict.items())))
 
     intersections_count, tracks_graph = count_tracks_intersections(
             tracks_dict)
+
+    #print("Intersections count:")
+    #print(next(iter(intersections_count.items())))
+
+    #print("Tracks graph:")
+    #print(next(iter(tracks_graph.items())))
 
     graph_to_unite, graph_to_separate = divide_tracks_graph(
             intersections_count,
             tracks_graph,
             tracks_dict)
+
+    #print("Graph to unite:")
+    #print(next(iter(graph_to_unite.items())))
+
+    #print("Graph to separate:")
+    #print(next(iter(graph_to_separate.items())))
     
     tracks_to_unite = get_connected_components(graph_to_unite)
+
+    #print("Tracks to unite:")
+    #print(tracks_to_unite[0])
 
     return tracks_dict, tracks_to_unite, graph_to_separate
 
