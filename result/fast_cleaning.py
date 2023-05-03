@@ -36,12 +36,13 @@ def divide_tracks_graph(
     return graph_to_unite, graph_to_separate
 
 
-def dfs(graph: dict, start: int, visited = None):
-    if visited is None: visited = set() 
+def dfs(graph: dict, start: int, all_visited: set, visited = set()):
+    if visited is None: visited = set()
     visited.add(start)
+    all_visited.add(start)
     for next_vertex in graph[start]:
-        if next_vertex not in visited:
-            dfs(graph, next_vertex, visited)
+        if next_vertex not in all_visited:
+            dfs(graph, next_vertex, all_visited, visited)
     return visited
 
 
@@ -50,9 +51,8 @@ def get_connected_components(graph: dict):
     connected_components = []
     for vertex in graph.keys():
         if vertex not in all_visited:
-            visited = dfs(graph, vertex)
+            dfs(graph, vertex, all_visited)
             connected_components.append(visited)
-            all_visited.union(visited)
     return connected_components
 
 
