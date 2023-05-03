@@ -1,0 +1,3 @@
+/home/username/MPD/sandbox/dubna.sandbox/cpp/bld/CMakeFiles/TrackRecognition.dir
+/home/username/MPD/sandbox/dubna.sandbox/cpp/bld/CMakeFiles/edit_cache.dir
+/home/username/MPD/sandbox/dubna.sandbox/cpp/bld/CMakeFiles/rebuild_cache.dir

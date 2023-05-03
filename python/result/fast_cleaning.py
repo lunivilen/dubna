@@ -61,26 +61,27 @@ def process_tracks(tracks: list):
     tracks_dict = {i : tracks[i] for i in range(len(tracks))}
     intersections_count, tracks_graph = count_tracks_intersections(
             tracks_dict)
-    print("Graph:")
-    print(len(tracks_graph))
+
+    #print("Graph:")
+    #print(len(tracks_graph))
     graph_to_unite, graph_to_separate = divide_tracks_graph(
             intersections_count,
             tracks_graph,
             tracks_dict)
 
-    print("Graph to unite:")
-    print(len(graph_to_unite))
-    print(list(graph_to_unite.items())[0])
-    print(list(graph_to_unite.items())[1])
-    print(list(graph_to_unite.items())[2])
+    #print("Graph to unite:")
+    #print(len(graph_to_unite))
+    #print(list(graph_to_unite.items())[0])
+    #print(list(graph_to_unite.items())[1])
+    #print(list(graph_to_unite.items())[2])
 
     tracks_to_unite = get_connected_components(graph_to_unite)
-    print("Tracks to unite:")
-    print(len(tracks_to_unite))
-    print(tracks_to_unite[0])
-    print(tracks_to_unite[1])
-    print(tracks_to_unite[2])
-    print(tracks_to_unite[3])
+    #print("Tracks to unite:")
+    #print(len(tracks_to_unite))
+    #print(tracks_to_unite[0])
+    #print(tracks_to_unite[1])
+    #print(tracks_to_unite[2])
+    #print(tracks_to_unite[3])
 
     end = time()
     print("All process_tracks time:")
