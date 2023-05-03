@@ -1,0 +1,5 @@
+*/__pycache__/
+*/bld/
+*/.vscode/
+*/.vs/
+*compile_commands.json
