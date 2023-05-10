@@ -37,6 +37,7 @@ def distance_to_line(m0, m1, m_check):
 
 
 def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
+    count = 0
     start = time()
     print("Staring real merging")
     i = 0

@@ -1,8 +1,5 @@
 from merging import get_vector, get_vector_length
-from scipy.interpolate import RBFInterpolator, BSpline
 from time import time
-import pandas as pd
-import numpy as np
 
 
 def remove_outliers(tracks: list):
@@ -13,7 +10,7 @@ def remove_outliers(tracks: list):
         while i < len(track) - 2:
             vec_1 = get_vector(track[i], track[i + 1])
             vec_2 = get_vector(track[i], track[i + 2])
-            if get_vector_length(vec_1) > get_vector_length(vec_2)*1.4:
+            if get_vector_length(vec_1) > get_vector_length(vec_2) * 1.4:
                 track.remove(track[i + 1])
             else:
                 i += 1
