@@ -14,17 +14,14 @@ def data_preparation_for_visualizing(data):
         head_indexes = []
         i = 0
         j = 0
-        for track_num in range(len(tracks)):
+        for track_id in range(len(tracks)):
             indexes.append([])
-            for hit in range(len(tracks[track_num])):
-                x = tracks[track_num][hit][1]
-                y = tracks[track_num][hit][2]
-                z = tracks[track_num][hit][3]
-                tracks_new.append([x, y, z])
-                if hit == 0:
-                    head_indexes.append([x, y, z])
+            for hit_id in range(len(tracks[track_id])):
+                tracks_new.append(tracks[track_id][hit_id])
+                if hit_id == 0:
+                    head_indexes.append(tracks[track_id][hit_id])
 
-                if hit != 0 and hit != len(tracks[track_num]) - 1:
+                if hit_id != 0 and hit_id != len(tracks[track_id]) - 1:
                     indexes[i].extend([j, j])
                 else:
                     indexes[i].extend([j])
@@ -48,47 +45,73 @@ def data_preparation_for_visualizing(data):
 
 
 class MainWindow(gl.GLViewWidget):
-    def __init__(self, tracks_data):
+    def __init__(self, tracks_data: list, hits_data: dict):
         super().__init__()
         self.stage = -1
-        self.data = data_preparation_for_visualizing(tracks_data)
+        self.tracks_data = data_preparation_for_visualizing(tracks_data)
+        self.simulation_data = data_preparation_for_visualizing([list(hits_data.values())])[0]
         self.is_indexes_showed = False
+        self.is_simulation_data_showed = False
         self.graph = gl.GLGraphItem()
         self.show_tracks()
 
     def keyPressEvent(self, key: QtGui.QKeyEvent) -> None:
         try:
-            if key.text() == '0' and self.is_indexes_showed:
-                self.is_indexes_showed = False
-                self.show_tracks()
-            elif key.text() == '0':
-                self.is_indexes_showed = True
-                self.show_indexes()
+            pressed_key = key.text()
+            if self.is_simulation_data_showed:
+                match pressed_key:
+                    case "-":
+                        self.is_simulation_data_showed = False
+                        self.show_tracks()
             else:
-                self.stage = int(key.text()) - 1
-                self.show_tracks()
+                match pressed_key:
+                    case "-":
+                        self.is_simulation_data_showed = True
+                        self.is_indexes_showed = False
+                        self.show_tracks(is_simulations_data=True)
+                    case "0":
+                        self.is_indexes_showed = not self.is_indexes_showed
+                        self.show_tracks()
+                    case _:
+                        self.stage = int(key.text()) - 1
+                        self.show_tracks()
         except ValueError:
             pass
 
-    def show_tracks(self):
+    def show_tracks(self, is_simulations_data=False):
         try:
-            node_positions = np.array(self.data[self.stage][0])
-            edges_index = np.array(self.data[self.stage][1])
-            self.clear()
+            # Get node positions and edges for tracks
+            if is_simulations_data:
+                node_positions = np.array(self.simulation_data[0])
+                edges_index = np.array(self.simulation_data[1])
+                colour = QColor(Qt.GlobalColor.cyan)
+                self.clear()
+            else:
+                node_positions = np.array(self.tracks_data[self.stage][0])
+                edges_index = np.array(self.tracks_data[self.stage][1])
+                colour = QColor(Qt.GlobalColor.green)
+                self.clear()
+                if self.is_simulation_data_showed:
+                    self.show_tracks(is_simulations_data=True)
+
+            # Create graph object
             self.graph.setData(nodePositions=node_positions,
                                edges=edges_index,
-                               edgeColor=QColor(Qt.GlobalColor.green),
+                               edgeColor=colour,
                                nodeColor=QColor(Qt.GlobalColor.gray),
                                edgeWidth=2)
             self.addItem(self.graph)
 
             if self.is_indexes_showed:
                 self.show_indexes()
+
         except IndexError:
             pass
 
     def show_indexes(self):
-        for i in range(len(self.data[self.stage][2])):
-            text = gl.GLTextItem(text=str(i), pos=self.data[self.stage][2][i],
-                                 font=QtGui.QFont('Helvetica', 14), color=QColor(Qt.GlobalColor.red))
+        for i in range(len(self.tracks_data[self.stage][2])):
+            text = gl.GLTextItem(text=str(i),
+                                 pos=self.tracks_data[self.stage][2][i],
+                                 font=QtGui.QFont('Helvetica', 14),
+                                 color=QColor(Qt.GlobalColor.red))
             self.addItem(text)

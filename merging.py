@@ -48,9 +48,9 @@ def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_d
         j = 0
         # Get vector of the first track
         if len(tracks[i]) == 2:
-            vec_1 = get_vector(tracks[i][0][1:4], tracks[i][1][1:4])
+            vec_1 = get_vector(tracks[i][0], tracks[i][1])
         else:
-            vec_1 = average_vec([tracks[i][k][1:4] for k in range(3)])
+            vec_1 = average_vec([tracks[i][k] for k in range(3)])
 
         while j < len(tracks) and i < len(tracks):
             # Check length of tracks
@@ -59,7 +59,7 @@ def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_d
                 continue
 
             # Check distance between tracks
-            vec_a = get_vector(tracks[i][0][1:4], tracks[j][-1][1:4])
+            vec_a = get_vector(tracks[i][0], tracks[j][-1])
             if get_vector_length(vec_a) > allowable_length:
                 j += 1
                 continue
@@ -71,9 +71,9 @@ def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_d
 
             # Get vector of the second track
             if len(tracks[j]) == 2:
-                vec_2 = get_vector(tracks[j][-1][1:4], tracks[j][-2][1:4])
+                vec_2 = get_vector(tracks[j][-1], tracks[j][-2])
             else:
-                vec_2 = average_vec([tracks[j][-k][1:4] for k in range(1, 4)])
+                vec_2 = average_vec([tracks[j][-k] for k in range(1, 4)])
 
             # Check angele between tracks
             if angle_between_vec(vec_1, vec_2) < allowable_angle:
@@ -81,9 +81,9 @@ def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_d
                 continue
 
             # Check distance between straight lines formed by tracks
-            distance = distance_to_line(np.array(tracks[i][0][1:4]),
-                                        np.array(tracks[i][1][1:4]),
-                                        np.array(tracks[j][-1][1:4]))
+            distance = distance_to_line(np.array(tracks[i][0]),
+                                        np.array(tracks[i][1]),
+                                        np.array(tracks[j][-1]))
             if distance < allowable_distance:
                 tracks[i].extend(tracks[j])
                 tracks[i] = sort_hits(tracks[i])

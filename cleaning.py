@@ -23,18 +23,28 @@ def separate_tracks(track_one: list, track_two: list):
     return track_one
 
 
-def sort_hits(track):
-    df = pd.DataFrame(track, columns=[0, 1, 2, 3, 4, 5, 6, 7, 8])
-    scatter_x = df[1].max() - df[1].min()
-    scatter_y = df[2].max() - df[2].min()
-    scatter_z = df[3].max() - df[3].min()
-    if max(scatter_x, scatter_y, scatter_z) == scatter_x:
-        track = list(df.sort_values(1, ascending=abs(df[1].max()) > abs(df[1].min())).values)
-    elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
-        track = list(df.sort_values(2, ascending=abs(df[2].max()) > abs(df[2].min())).values)
-    else:
-        track = list(df.sort_values(3, ascending=abs(df[3].max()) > abs(df[3].min())).values)
-    return list(map(list, track))
+def sort_hits(points):
+    points = list(map(lambda x: np.array(x), points))
+
+    # Нахождение расстояния каждой точки до центра координат
+    distances_to_center = np.linalg.norm(points, axis=1)
+
+    # Нахождение индекса ближайшей точки
+    nearest_point_index = np.argmin(distances_to_center)
+
+    # Формирование линии из точек
+    line = [points[nearest_point_index]]
+    remaining_points = np.delete(points, np.where(points == points[nearest_point_index])[0], axis=0)
+    while len(remaining_points) > 0:
+        last_point = line[-1]
+        distances = np.linalg.norm(remaining_points - last_point, axis=1)
+        closest_point_index = np.argmin(distances)
+        closest_point = remaining_points[closest_point_index]
+        line.append(closest_point)
+        remaining_points = np.delete(remaining_points, closest_point_index, axis=0)
+
+    line = list(map(lambda x: list(x), line))
+    return line
 
 
 def cleaning(tracks: list):
@@ -107,10 +117,10 @@ def cleaning(tracks: list):
             i += 1
     print(f"Track separating completed in {time() - start} seconds")
 
-    # Return to x,y,z and etc.
+    # Return to x,y,z
     for i in range(len(tracks)):
         for j in range(len(tracks[i])):
-            tracks[i][j] = hits[tracks[i][j]]
+            tracks[i][j] = hits[tracks[i][j]][1:]
 
     print("Staring sorting the points in the track")
     start = time()
