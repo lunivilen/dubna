@@ -9,7 +9,7 @@ file(GLOB CPPS "${SOURCES}/*.cpp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Debug)
 
-add_executable(${PROJECT_NAME} ${CPPS} src/main.cpp)
+add_executable(${PROJECT_NAME} ${CPPS} src/main.cpp hdr/get_data.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${HEADERS}
