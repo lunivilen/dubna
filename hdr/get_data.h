@@ -29,17 +29,21 @@ vector<vector<vector<float>>> get_data(const string &path, const int &amount_par
     vector<vector<vector<float>>> tracks;
     int track_id = 0;
 
+    // Open file and read it line by line
     ifstream file(path);
     for (string str_track; !file.eof(); getline(file, str_track)) {
         if (str_track.empty())
             continue;
 
+        // Convert line from file to vector
         vector<float> track = string_track_to_vector(str_track);
 
         vector<float> temp;
         int amount_characteristics = 0;
         int j = 0;
         tracks.emplace_back();
+
+        // Separate characteristics to different vectors for each hit
         while (j < track.capacity()) {
             if (amount_characteristics < amount_parameters_in_hit) {
                 if (amount_characteristics != 0 && amount_characteristics < 5)
