@@ -29,7 +29,7 @@ def sort_hits(points):
     # Нахождение расстояния каждой точки до центра координат
     distances_to_center = np.linalg.norm(points, axis=1)
 
-    # Нахождение индекса ближайшей точки
+    # Нахождение индекса ближайшей к центру точки
     nearest_point_index = np.argmin(distances_to_center)
 
     # Формирование линии из точек
