@@ -1,6 +1,6 @@
 # Tracks visualization tool
 
-Required libraries: PyQt6, pyqtgraph,PyOpenGL, numpy, pandas
+Required libraries: PyQt6, pyqtgraph,PyOpenGL, numpy, pandas, scipy
 
 When you run the main.py, event.txt must be located in the "data" folder,
  just like it is in the repository
