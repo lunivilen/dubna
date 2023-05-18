@@ -13,9 +13,7 @@ from merging import merging
 import sys
 
 result = []
-s = time.time()
 result.append(get_tracks_data("data/event0.txt", 10))
-print(time.time() - s)
 hits = get_hits_data("data/event0_hits.txt")
 
 # tracks_dict, tracks_to_unite, graph_to_separate = process_tracks(result[0])
