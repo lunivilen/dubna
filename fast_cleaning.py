@@ -88,3 +88,18 @@ def process_tracks(tracks: list):
     print(end - first_start)
     return tracks_dict, tracks_to_unite, graph_to_separate
 
+
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
+def unite_tracks(tracks_dict, tracks_to_unite, graph_to_separate):
+    tracks = []
+    for i in range(len(tracks_to_unite)):
+        track = []
+        for j in list(tracks_to_unite[i]):
+            track.append((tracks_dict[j]))
+        tracks.append(flatten(track))
+    tracks
+    return tracks
+
