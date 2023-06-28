@@ -49,7 +49,8 @@ class MainWindow(gl.GLViewWidget):
         super().__init__()
         self.stage = -1
         self.tracks_data = data_preparation_for_visualizing(tracks_data)
-        self.simulation_data = data_preparation_for_visualizing([list(hits_data.values())])[0]
+        self.simulation_data = data_preparation_for_visualizing([list(hits_data)])[0]
+        # self.simulation_data = data_preparation_for_visualizing([list(hits_data.values())])[0]
         self.is_indexes_showed = False
         self.is_simulation_data_showed = False
         self.graph = gl.GLGraphItem()

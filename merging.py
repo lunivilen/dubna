@@ -101,9 +101,9 @@ def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_d
                 continue
 
             # Check distance between straight lines formed by tracks
-            distance = distance_to_line(np.array(tracks[i][0]),
-                                        np.array(tracks[i][1]),
-                                        np.array(tracks[j][-1]))
+            distance = distance_to_line(np.array(tracks[i][0][0:3]),
+                                        np.array(tracks[i][1][0:3]),
+                                        np.array(tracks[j][-1][0:3]))
             if distance < allowable_distance:
                 tracks[i].extend(tracks[j])
                 tracks[i] = sort_hits(tracks[i])

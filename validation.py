@@ -1,11 +1,14 @@
 from merging import get_distance
+from itertools import chain
+from copy import deepcopy
 
 def add_track_number(tracks):
-    tracks_numbd = tracks
+    tracks_numbd = deepcopy(tracks)
     for i in range(len(tracks_numbd)):
         for track in tracks_numbd[i]:
             track.insert(0, i)
     return tracks_numbd
+
 
 def get_unique_tracks_and_coords(tracks,
                                  track_id_loc: int,
@@ -25,12 +28,12 @@ def get_selected_tracks(tracks):
     for i in range(len(tracks)):
         selected_tracks.append([])
         for track in tracks[i]:
-            if len(track) > 5 and get_distance(track, [0,0,200]) < 1000:
+            if len(track) > 5: #and get_distance(track, [0,0,200]) < 1000:
                 selected_tracks[i].append(track)
     return selected_tracks
 
 def crop_list(listA):
-    new_list = listA
+    new_list = deepcopy(listA)
     for i in range(len(new_list)):
         new_list[i] = new_list[i][0]
     return new_list
@@ -48,22 +51,40 @@ def get_tracks_from_hits(hits):
     return 
 
 def get_simple_efficiency(tracks, hits):
-    n_reco = len(get_unique_tracks_and_coords(tracks, 0, 2, 4)[0])
-    n_real = len(get_unique_tracks_and_coords(hits, 3, 1, 3)[0])
+    n_reco = len(get_unique_tracks_and_coords(tracks, 0, 1, 3)[0])
+    n_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
     efficiency = n_reco / n_real
     print('Number of reco tracks:', n_reco)
     print('Number of real tracks:', n_real)
     print('Efficiency value is:', efficiency)
     return efficiency
 
+def get_matched_tracks(tracks, hits):
+    tracks_hits = {}
+    tracks_matched = []
+    # tracks = get_selected_tracks(tracks)
+    #
+    for i in range(len(tracks)):
+        tracks_hits[i] = []
+        for hit in tracks[i]:
+            tracks_hits[i].append(hits[int(hit[3])][0])
+        flat=list(chain.from_iterable(tracks_hits[i]))
+        if flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) > 0.5:
+            tracks_matched.append(tracks[i])
+    return tracks_matched
+
 def get_efficiency(tracks, hits):
-    n_selected_reco = len(get_unique_tracks_and_coords(get_selected_tracks(tracks), 0, 2, 4)[0])
-    n_real = len(get_unique_tracks_and_coords(hits, 3, 1, 3)[0])
-    n_selected_real = len(get_unique_tracks_and_coords(get_selected_tracks(get_tracks_from_hits(hits)), 3, 1, 3)[0])
+    # n_selected_reco = len(get_unique_tracks_and_coords(get_selected_tracks(tracks), 3, 0, 2)[0])
+    # print(len(tracks))
+    n_matched = len(get_matched_tracks(tracks, hits))
+    # n_matched = len(get_unique_tracks_and_coords(get_matched_tracks(tracks, hits), 0, 1, 3)[0])
+    n_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
+    n_selected_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
+    # n_selected_real = len(get_unique_tracks_and_coords(get_tracks_from_hits(hits), 3, 1, 3)[0])
     # n_matched = len(get_unique_tracks_and_coords(get_matched_tracks(tracks), 0, 2, 4)[0])
-    print('Number of reco tracks:', n_selected_reco)
-    print('Number of real tracks:', n_real)
-    efficiency = n_selected_reco / n_selected_real
+    print('Number of reco tracks:', n_matched)
+    print('Number of real selected tracks:', n_real)
+    efficiency = n_matched / n_real
     return efficiency
 
 def get_real_tracks(tracks, hits): 

@@ -48,7 +48,7 @@ def sort_hits(points):
 
 
 def sort_hits_old(track):
-    df = pd.DataFrame(track, columns=[0, 1, 2])
+    df = pd.DataFrame(track, columns=[0, 1, 2, 3])
     scatter_x = df[0].max() - df[0].min()
     scatter_y = df[1].max() - df[1].min()
     scatter_z = df[2].max() - df[2].min()
@@ -68,7 +68,7 @@ def cleaning(tracks: list):
     hits = {}
     for i in range(len(tracks)):
         for j in range(len(tracks[i])):
-            s = tracks[i][j][0]
+            s = tracks[i][j][3]
             hits[s] = tracks[i][j]
             tracks[i][j] = s
 
@@ -134,7 +134,9 @@ def cleaning(tracks: list):
     # Return to x,y,z
     for i in range(len(tracks)):
         for j in range(len(tracks[i])):
-            tracks[i][j] = hits[tracks[i][j]][1:]
+            s = tracks[i][j]
+            tracks[i][j] = hits[tracks[i][j]][:3]
+            tracks[i][j].append(s)
 
     print("Staring sorting the points in the track")
     start = time()
@@ -142,6 +144,7 @@ def cleaning(tracks: list):
     # Sort the hits in the correct order after merge
     for i in range(len(tracks)):
         tracks[i] = sort_hits_old(tracks[i])
+
 
     print(f"Sorting completed in {time() - start} seconds")
     print(f"After cleaning there are {len(tracks)} tracks")

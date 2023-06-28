@@ -14,7 +14,7 @@ def get_tracks_data(path, amount_parameters_in_hit) -> list:
             j = 0
             while j < len(mas):
                 if amount_characteristics != amount_parameters_in_hit:
-                    if amount_characteristics != 0:
+                    if amount_characteristics < 4:
                         temp.append(float(mas[j]))
                     amount_characteristics += 1
                     j += 1
@@ -28,13 +28,14 @@ def get_tracks_data(path, amount_parameters_in_hit) -> list:
     return tracks
 
 
-def get_hits_data(path) -> dict:
-    hits = defaultdict(list)
+def get_hits_data(path): #-> dict:
+    # hits = defaultdict(list)
+    hits = []
     with open(path) as f:
         for i in f:
             hit = list(map(float, i.split(", ")))
-            hits[str(hit[3])].append(hit[:3])
+            hits.append([hit])
 
-    for id_track in hits.keys():
-        hits[id_track] = sort_hits(hits[id_track])
+    # for id_track in hits.keys():
+    #     hits[id_track] = sort_hits(hits[id_track])
     return hits

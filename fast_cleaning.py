@@ -1,5 +1,6 @@
 from time import time
 from collections import defaultdict
+from cleaning import separate_tracks
 
 def count_tracks_intersections(all_tracks: dict):                                 
     intersections = defaultdict(list)
@@ -93,13 +94,41 @@ def process_tracks(tracks: list):
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
-def unite_tracks(tracks_dict, tracks_to_unite, graph_to_separate):
+def tracks_separation(tracks_dict, graph_to_separate):
+    for graph in graph_to_separate:
+        if type(graph) != int:
+            for i in range(1, len(graph)):
+                separate_tracks(tracks_dict[i-1], tracks_dict[i])
+    return tracks_dict
+
+def unite_tracks(tracks_dict, tracks_to_unite):
     tracks = []
     for i in range(len(tracks_to_unite)):
         track = []
         for j in list(tracks_to_unite[i]):
+            print(i)
             track.append((tracks_dict[j]))
         tracks.append(flatten(track))
-    tracks
     return tracks
 
+def fast_cleaning(tracks):
+    tracks_dict, tracks_to_unite, graph_to_separate = process_tracks(tracks)
+    # print('Length of the first track before uniting: ', len(tracks_dict[i]))
+    # print('Number of tracks before uniting: ', len(tracks_dict))
+
+    tracks_dict = unite_tracks(tracks_dict, tracks_to_unite)
+    # print('Length of the first track after uniting: ', len(tracks_dict[i]))   
+
+
+    tracks = tracks_separation(tracks_dict, graph_to_separate)
+    # print('Length of the first track after separation: ', len(tracks[i]))
+
+    tracks = tracks_dict
+
+    for i in range(len(tracks)):
+        for j in range(len(tracks[i])):
+            tracks[i][j] = tracks[i][j][1:]
+
+    print('Number of tracks after cleaning: ', len(tracks))
+
+    return tracks
