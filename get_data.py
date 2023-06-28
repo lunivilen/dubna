@@ -30,13 +30,14 @@ def get_tracks_data(path, amount_parameters_in_hit) -> list:
     return tracks
 
 
-def get_hits_data(path) -> dict:
-    hits = defaultdict(list)
+def get_hits_data(path): #-> dict:
+    # hits = defaultdict(list)
+    hits = []
     with open(path) as f:
         for i in f:
-            hit = list(map(float, i.split(",")))
+            hit = list(map(float, i.split(", ")))
             hits[str(hit[3])].append(hit[:3])
 
-    for id_track in hits.keys():
-        hits[id_track] = sort_hits(hits[id_track])
+    # for id_track in hits.keys():
+    #     hits[id_track] = sort_hits(hits[id_track])
     return hits
