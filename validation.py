@@ -40,15 +40,22 @@ def crop_list(listA):
 
 def get_tracks_from_hits(hits):
     trimmed_hits = crop_list(hits)
-    trimmed_hits = sorted(trimmed_hits, key=lambda x: x[2], reverse=False)
-    tracks_from_hits = [[]]
+    trimmed_hits = sorted(trimmed_hits, key=lambda x: x[3], reverse=False)
+    tracks_from_hits = {}
+    track = []
     # for i in range(len(trimmed_hits)):
     #     tracks_from_hits.append([])
+
     for i in range(1, len(trimmed_hits)):
-        if trimmed_hits[i-1][2] == trimmed_hits[i][2]:
-            tracks_from_hits[i-1].append(trimmed_hits[i-1])
-        else: tracks_from_hits.append([])
-    return 
+        if trimmed_hits[i-1][3] == trimmed_hits[i][3] and trimmed_hits[i-1][3] != trimmed_hits[-1][3]:
+            track.append(trimmed_hits[i-1])
+        elif trimmed_hits[i-1][3] != trimmed_hits[-1][3]: 
+            tracks_from_hits[int(trimmed_hits[i-1][3])] = track
+            track = []
+        elif trimmed_hits[i-1][3] == trimmed_hits[i][3] and trimmed_hits[i-1][3] == trimmed_hits[-1][3]:
+            tracks_from_hits[int(trimmed_hits[i][3])] = track
+            tracks_from_hits[int(trimmed_hits[i][3])].append(trimmed_hits[i-1])
+    return tracks_from_hits
 
 def get_simple_efficiency(tracks, hits):
     n_reco = len(get_unique_tracks_and_coords(tracks, 0, 1, 3)[0])
@@ -59,24 +66,38 @@ def get_simple_efficiency(tracks, hits):
     print('Efficiency value is:', efficiency)
     return efficiency
 
-def get_matched_tracks(tracks, hits):
+def get_matched_tracks(tracks, hits, n, ratio=0.5):  #n - minimal length of a track
     tracks_hits = {}
     tracks_matched = []
+    tracks_from_hits = {}
+    tracks_from_hits = get_tracks_from_hits(hits)
     # tracks = get_selected_tracks(tracks)
-    #
-    for i in range(len(tracks)):
+    track_ids = []
+    for i in range(len(tracks)): 
         tracks_hits[i] = []
+        track_ids.append([])
+        track_id = []
         for hit in tracks[i]:
-            tracks_hits[i].append(hits[int(hit[3])][0])
-        flat=list(chain.from_iterable(tracks_hits[i]))
-        if flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) > 0.5:
+            tracks_hits[i].append(hits[int(hit[3])][0]) #gets track's hits characteristics from hits list 
+            track_id.append(int(hits[int(hit[3])][0][3]))
+        track_ids[i] = max(set(track_id), key = track_id.count)  
+        # flat = list(chain.from_iterable(tracks_hits[i]))   
+        # flat = [val for val in flat if val.is_integer() and val >= 0]
+        #flat.count(max(set(flat), key = flat.count)) - checks how many hits are a part of the same original track len(tracks_hits[i])
+    used_ids = []
+    matched_ids = []
+    for i in range(len(tracks)):
+        if len(tracks[i]) > n and  track_ids[i] not in used_ids and len(tracks_hits[i]) / len(tracks_from_hits[int(track_ids[i])]) > ratio:
             tracks_matched.append(tracks[i])
+            used_ids.append(track_ids[i])
+            matched_ids.append(['True', i])
+        else: matched_ids.append(['False', i])
     return tracks_matched
 
-def get_efficiency(tracks, hits):
+def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal length of a track 
     # n_selected_reco = len(get_unique_tracks_and_coords(get_selected_tracks(tracks), 3, 0, 2)[0])
     # print(len(tracks))
-    n_matched = len(get_matched_tracks(tracks, hits))
+    n_matched = len(get_matched_tracks(tracks, hits, min_length, ratio))
     # n_matched = len(get_unique_tracks_and_coords(get_matched_tracks(tracks, hits), 0, 1, 3)[0])
     n_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
     n_selected_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
