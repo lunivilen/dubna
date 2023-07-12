@@ -7,7 +7,8 @@ from visualizing import MainWindow
 from smoothing import smoothing
 from save_data import save_data
 from get_data import get_tracks_data, get_hits_data
-from cleaning import cleaning
+from cleaning_new import cleaning_new
+from cleaning_old import cleaning_old
 from merging import merging
 
 import sys
@@ -17,13 +18,14 @@ result.append(get_tracks_data("data/event0.txt", 10))
 hits = get_hits_data("data/event0_hits.txt")
 
 # tracks_dict, tracks_to_unite, graph_to_separate = process_tracks(result[0])
-result.append(cleaning(list(map(lambda x: x.copy(), result[0]))))
-result.append(merging(list(map(lambda x: x.copy(), result[1])),
-                      allowable_angle=160,
-                      allowable_length=700,
-                      allowable_distance=35))
-result.append(remove_outliers(list(map(lambda x: x.copy(), result[2]))))
-result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=150))
+result.append(cleaning_new(list(map(lambda x: x.copy(), result[0]))))
+# result.append(cleaning_old(list(map(lambda x: x.copy(), result[0]))))
+# result.append(merging(list(map(lambda x: x.copy(), result[1])),
+#                       allowable_angle=160,
+#                       allowable_length=700,
+#                       allowable_distance=35))
+# result.append(remove_outliers(list(map(lambda x: x.copy(), result[2]))))
+# result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=150))
 # save_data(tracks)
 
 
