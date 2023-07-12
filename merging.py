@@ -1,4 +1,4 @@
-from cleaning import sort_hits
+from cleaning_new import sort_hits
 from time import time
 import numpy as np
 import math
