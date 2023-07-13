@@ -66,39 +66,40 @@ def get_simple_efficiency(tracks, hits):
     print('Efficiency value is:', efficiency)
     return efficiency
 
-# def get_matched_tracks(tracks, hits, n, ratio=0.5):  #n - minimal length of a track
-#     tracks_hits = {}
-#     tracks_matched = []
-#     tracks_from_hits = {}
-#     tracks_from_hits = get_tracks_from_hits(hits)
-#     # tracks = get_selected_tracks(tracks)
-#     track_ids = []
-#     for i in range(len(tracks)): 
-#         tracks_hits[i] = []
-#         track_ids.append([])
-#         track_id = []
-#         for hit in tracks[i]:
-#             tracks_hits[i].append(hits[int(hit[3])][0]) #gets track's hits characteristics from hits list 
-#             track_id.append(int(hits[int(hit[3])][0][3]))
-#         track_ids[i] = max(set(track_id), key = track_id.count)  
-#         flat = list(chain.from_iterable(tracks_hits[i]))   
-#         # flat = [val for val in flat if val.is_integer() and val >= 0]
-#         flat.count(max(set(flat), key = flat.count)) #checks how many hits are a part of the same original track len(tracks_hits[i])
-#     used_ids = []
-#     matched_ids = []
-#     for i in range(len(tracks)):
-#         if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks[i]) > ratio:
-#             tracks_matched.append(tracks[i])
-#             used_ids.append(track_ids[i])
-#             matched_ids.append(['True', i])
-#         else: matched_ids.append(['False', i])
-#     return tracks_matched
+def get_matched_ids(tracks, hits, n, ratio=0.5):  #n - minimal length of a track
+    tracks_hits = {}
+    tracks_matched = []
+    tracks_from_hits = {}
+    tracks_from_hits = get_tracks_from_hits(hits)
+    # tracks = get_selected_tracks(tracks)
+    track_ids = []
+    for i in range(len(tracks)): 
+        tracks_hits[i] = []
+        track_ids.append([])
+        track_id = []
+        for hit in tracks[i]:
+            tracks_hits[i].append(hits[int(hit[3])][0]) #gets track's hits characteristics from hits list 
+            track_id.append(int(hits[int(hit[3])][0][3]))
+        track_ids[i] = max(set(track_id), key = track_id.count)  
+        flat = list(chain.from_iterable(tracks_hits[i]))   
+        # flat = [val for val in flat if val.is_integer() and val >= 0]
+        flat.count(max(set(flat), key = flat.count)) #checks how many hits are a part of the same original track len(tracks_hits[i])
+    used_ids = []
+    matched_ids = []
+    for i in range(len(tracks)):
+        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks[i]) > ratio:
+            tracks_matched.append(tracks[i])
+            used_ids.append(track_ids[i])
+            matched_ids.append(['True', i])
+        else: matched_ids.append(['False', i])
+    return matched_ids
 
 def get_matched_tracks(tracks, hits, n, ratio=0.5):
     tracks_hits = {}
     tracks_matched = []
     used_ids = []
     track_ids = []
+    matched_ids = []
     # tracks = get_selected_tracks(tracks)
     #
     for i in range(len(tracks)): 
@@ -114,19 +115,53 @@ def get_matched_tracks(tracks, hits, n, ratio=0.5):
         tracks_hits[i] = []
         for hit in tracks[i]:
             tracks_hits[i].append(hits[int(hit[3])][0])
+            track_id.append(int(hits[int(hit[3])][0][3]))
+        
         flat=list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) > ratio:
+        if len(tracks[i]) >= n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) >= ratio:
             tracks_matched.append(tracks[i])
             used_ids.append(track_ids[i])
-    return tracks_matched
+            matched_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
+        elif (['False', track_ids[i]] not in matched_ids) and (['True', track_ids[i]] not in matched_ids): matched_ids.append(['False', track_ids[i]])
+    
+    matched_id = deepcopy(matched_ids)
+    for i in range(1, len(matched_ids)-1):
+        if matched_ids[i-1][1] == matched_ids[i][1] and matched_ids[i-1][0]=='False' and matched_ids[i][0]=='True': 
+            matched_id.remove(matched_ids[i-1])
+
+    real_tracks = get_tracks_from_hits(hits)
+    real_matched = []
+
+    for i in range(len(list(real_tracks.values()))):
+        if len(list(real_tracks.values())[i])+1 >= n: 
+            real_matched.append(list(real_tracks.values())[i])
+    
+    real_length = []
+    for i in range(len(list(real_tracks.items()))):
+        real_length.append([list(real_tracks.items())[i][0], len(list(real_tracks.items())[i][1])])
+
+    return tracks_matched, real_matched
+
+with open(r'matched_ids.txt', 'w') as fp:
+    for item in matched_id:
+        # write each item on a new line
+        fp.write("%s\n" % item)
+    print('Done')
+
+with open(r'real_lengths.txt', 'w') as fp:
+    for item in real_length:
+        # write each item on a new line
+        fp.write("%s\n" % item)
+    print('Done')
 
 def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal length of a track 
     # n_selected_reco = len(get_unique_tracks_and_coords(get_selected_tracks(tracks), 3, 0, 2)[0])
     # print(len(tracks))
-    n_matched = len(get_matched_tracks(tracks, hits, min_length, ratio))
+    tracks_matched, real_matched = get_matched_tracks(tracks, hits, min_length, ratio)
+    n_matched = len(tracks_matched)
     # n_matched = len(get_unique_tracks_and_coords(get_matched_tracks(tracks, hits), 0, 1, 3)[0])
-    n_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
-    n_selected_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
+    n_real = len(real_matched)
+    # n_selected_real = len(get_unique_tracks_and_coords(hits, 4, 1, 3)[0])
     # n_selected_real = len(get_unique_tracks_and_coords(get_tracks_from_hits(hits), 3, 1, 3)[0])
     # n_matched = len(get_unique_tracks_and_coords(get_matched_tracks(tracks), 0, 2, 4)[0])
     print('Number of reco tracks:', n_matched)
