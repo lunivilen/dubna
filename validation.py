@@ -63,6 +63,20 @@ def get_matched_tracks(tracks, hits, n, ratio=0.5):
     real_matched = get_real_matched_tracks(matched_ids, hits, n)
     return tracks_matched, real_matched
 
+def get_fake_tracks(tracks, hits, n=20, ratio=0.5):
+    fake_ids = []
+    fake_tracks = []
+    used_ids = []
+    tracks_hits, track_ids = get_hit_chars(tracks, hits)
+    for i in range(len(tracks)):
+        flat=list(chain.from_iterable(tracks_hits[i]))
+        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
+            fake_tracks.append(tracks[i])
+            used_ids.append(track_ids[i])
+            fake_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
+        elif (['False', track_ids[i]] not in fake_ids) and (['True', track_ids[i]] not in fake_ids): fake_ids.append(['False', track_ids[i]])
+    return fake_tracks
+
 def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal length of a track 
     #hits should have 4 characterisrics, fourth being track_id
     tracks_matched, real_matched = get_matched_tracks(tracks, hits, min_length, ratio)
@@ -73,6 +87,25 @@ def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal l
     efficiency = n_matched / n_real
     return efficiency
 
+
+def get_fake_rate(tracks, hits, min_length=20, ratio=0.5):
+    fake_tracks = get_fake_tracks(tracks, hits, min_length, ratio)
+    real_matched = get_matched_tracks(tracks, hits, min_length, ratio=0.5)[1]
+    n_fake = len(fake_tracks)
+    n_real = len(real_matched)
+    print('Number of fake tracks:', n_fake)
+    print('Number of real selected tracks:', n_real)
+    fake_rate = n_fake / n_real
+    return fake_rate
+
+def get_purity(tracks, hits, min_length=20, ratio=0.5):
+    tracks_matched = get_matched_tracks(tracks, hits, min_length, ratio)[0]
+    n_matched = len(tracks_matched)
+    n_reco = len(tracks)
+    purity = n_matched / n_reco
+    print('Number of real reco tracks:', n_matched)
+    print('Number of reco tracks:', n_reco)
+    return purity
 
 # def add_track_number(tracks):
 #     tracks_numbd = deepcopy(tracks)
