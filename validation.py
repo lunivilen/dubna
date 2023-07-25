@@ -70,12 +70,12 @@ def get_fake_tracks(tracks, hits, n=20, ratio=0.5):
     tracks_hits, track_ids = get_hit_chars(tracks, hits)
     for i in range(len(tracks)):
         flat=list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
+        if len(tracks[i]) > n and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
             fake_tracks.append(tracks[i])
-            used_ids.append(track_ids[i])
+            # used_ids.append(track_ids[i])
             fake_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
         elif (['False', track_ids[i]] not in fake_ids) and (['True', track_ids[i]] not in fake_ids): fake_ids.append(['False', track_ids[i]])
-    return fake_tracks
+    return fake_tracks, fake_ids
 
 def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal length of a track 
     #hits should have 4 characterisrics, fourth being track_id
@@ -87,12 +87,18 @@ def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal l
     efficiency = n_matched / n_real
     return efficiency
 
+def get_selected_real(tracks, min_length):
+    selected_tracks = []
+    for track in tracks:
+        if len(track)>min_length:
+            selected_tracks.append(track)
+    return selected_tracks
 
 def get_fake_rate(tracks, hits, min_length=20, ratio=0.5):
-    fake_tracks = get_fake_tracks(tracks, hits, min_length, ratio)
-    real_matched = get_matched_tracks(tracks, hits, min_length, ratio=0.5)[1]
+    fake_tracks = get_fake_tracks(tracks, hits, min_length, ratio)[0]
     n_fake = len(fake_tracks)
-    n_real = len(real_matched)
+    # n_real = len(real_matched)
+    n_real = len(get_selected_real(tracks, min_length))
     print('Number of fake tracks:', n_fake)
     print('Number of real selected tracks:', n_real)
     fake_rate = n_fake / n_real
