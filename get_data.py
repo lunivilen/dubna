@@ -1,13 +1,33 @@
 from collections import defaultdict
 from cleaning_new import sort_hits
+import re
+
+
+# Берёт из всех параметров хита, только нужные
+def clear_temp(temp, x_index, y_index, z_index, hit_index):
+    x = temp[x_index]
+    y = temp[y_index]
+    z = temp[z_index]
+    hit_id = temp[hit_index]
+    return [hit_id, x, y, z]
 
 
 def get_tracks_data(path, amount_parameters_in_hit) -> list:
     track_id = 0
     tracks = []
+    x_index = 1
+    y_index = 2
+    z_index = 3
+    hit_index = 0
+
     with open(path) as f:
         for i in f:
             if 'format' in i:
+                data_format = re.findall(r'\((.*)\)', i)[0].split(', ')
+                x_index = data_format.index('x')
+                y_index = data_format.index('y')
+                z_index = data_format.index('z')
+                hit_index = data_format.index('hit-index')
                 continue
 
             temp = []
@@ -21,23 +41,37 @@ def get_tracks_data(path, amount_parameters_in_hit) -> list:
                     amount_characteristics += 1
                     j += 1
                 else:
-                    tracks[track_id].append(temp[:])
+                    tracks[track_id].append(clear_temp(temp, x_index, y_index, z_index, hit_index))
                     temp = []
                     amount_characteristics = 0
             if j == len(mas):
-                tracks[track_id].append(temp[:])
+                tracks[track_id].append(clear_temp(temp, x_index, y_index, z_index, hit_index))
             track_id += 1
     return tracks
 
 
-def get_hits_data(path): #-> dict:
-    # hits = defaultdict(list)
-    hits = []
+def get_hits_data(path) -> dict:
+    hits = defaultdict(list)
     with open(path) as f:
         for i in f:
+            if 'format' in i:
+                continue
+
             hit = list(map(float, i.split(", ")))
             hits[str(hit[3])].append(hit[:3])
 
-    # for id_track in hits.keys():
-    #     hits[id_track] = sort_hits(hits[id_track])
+    for id_track in hits.keys():
+        hits[id_track] = sort_hits(hits[id_track])
+    return hits
+
+
+def get_hits_data_for_validation(path) -> list:
+    hits = []
+    with open(path) as f:
+        for i in f:
+            if 'format' in i:
+                continue
+
+            hit = list(map(float, i.split(", ")))
+            hits.append(hit)
     return hits
