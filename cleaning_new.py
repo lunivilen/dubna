@@ -8,12 +8,13 @@ def merge_tracks(track_one: list, track_two: list):
     temp_mas = np.concatenate((track_one, track_two))
     unique = np.unique(temp_mas)
     difference = temp_mas.shape[0] - unique.shape[0]
-    if difference / len(track_two) > similarity_factor:
-        return unique.tolist(), 1
-    elif difference / len(track_one) > similarity_factor:
-        return unique.tolist(), 2
+    if difference / len(track_two) > similarity_factor or difference / len(track_one) > similarity_factor:
+        if len(track_one) > len(track_two):
+            return 1
+        else:
+            return 2
     else:
-        return [], 0
+        return 0
 
 
 def separate_tracks(track_one: list, track_two: list):
@@ -61,7 +62,7 @@ def sort_hits_old(track):
     return list(map(list, track))
 
 
-def cleaning_old(tracks: list):
+def cleaning_new(tracks: list):
     print(f"Before cleaning there are {len(tracks)} tracks")
 
     # Speed up
@@ -80,13 +81,11 @@ def cleaning_old(tracks: list):
         j = i + 1
         while j < len(tracks) and i < len(tracks):
             if tracks[j][0] in tracks[i] and i != j:
-                merged_track, number = merge_tracks(tracks[i], tracks[j])
+                number = merge_tracks(tracks[i], tracks[j])
                 if number == 1:
-                    tracks[i] = merged_track
                     tracks.pop(j)
                     j -= 1
                 elif number == 2:
-                    tracks[j] = merged_track
                     tracks.pop(i)
                     i -= 1
                     break
@@ -102,13 +101,11 @@ def cleaning_old(tracks: list):
         j = i + 1
         while j < len(tracks) and i < len(tracks):
             if i != j:
-                merged_track, number = merge_tracks(tracks[i], tracks[j])
+                number = merge_tracks(tracks[i], tracks[j])
                 if number == 1:
-                    tracks[i] = merged_track
                     tracks.pop(j)
                     j -= 1
                 elif number == 2:
-                    tracks[j] = merged_track
                     tracks.pop(i)
                     i -= 1
                     break

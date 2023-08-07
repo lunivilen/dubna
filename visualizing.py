@@ -49,10 +49,11 @@ class MainWindow(gl.GLViewWidget):
         super().__init__()
         self.stage = -1
         self.tracks_data = data_preparation_for_visualizing(tracks_data)
-        self.simulation_data = data_preparation_for_visualizing([list(hits_data)])[0]
-        # self.simulation_data = data_preparation_for_visualizing([list(hits_data.values())])[0]
+        self.simulation_data = data_preparation_for_visualizing([list(hits_data.values())])[0]
+        self.simulation_data_indexes = list(hits_data.keys())
         self.is_indexes_showed = False
         self.is_simulation_data_showed = False
+        self.is_simulation_data_indexes_showed = False
         self.graph = gl.GLGraphItem()
         self.show_tracks()
 
@@ -64,15 +65,18 @@ class MainWindow(gl.GLViewWidget):
                     case "-":
                         self.is_simulation_data_showed = False
                         self.show_tracks()
+                    case "=":
+                        self.is_simulation_data_indexes_showed = not self.is_simulation_data_indexes_showed
+                        self.show_tracks(True)
             else:
                 match pressed_key:
+                    case "0":
+                        self.is_indexes_showed = not self.is_indexes_showed
+                        self.show_tracks()
                     case "-":
                         self.is_simulation_data_showed = True
                         self.is_indexes_showed = False
                         self.show_tracks(is_simulations_data=True)
-                    case "0":
-                        self.is_indexes_showed = not self.is_indexes_showed
-                        self.show_tracks()
                     case _:
                         self.stage = int(key.text()) - 1
                         self.show_tracks()
@@ -95,6 +99,9 @@ class MainWindow(gl.GLViewWidget):
                 if self.is_simulation_data_showed:
                     self.show_tracks(is_simulations_data=True)
 
+                if self.stage == len(self.tracks_data) - 1:
+                    colour = QColor(Qt.GlobalColor.darkYellow)
+
             # Create graph object
             self.graph.setData(nodePositions=node_positions,
                                edges=edges_index,
@@ -106,8 +113,19 @@ class MainWindow(gl.GLViewWidget):
             if self.is_indexes_showed:
                 self.show_indexes()
 
+            if self.is_simulation_data_indexes_showed and self.is_simulation_data_showed:
+                self.show_simulation_indexes()
+
         except IndexError:
             pass
+
+    def show_simulation_indexes(self):
+        for i in range(len(self.simulation_data_indexes)):
+            text = gl.GLTextItem(text=self.simulation_data_indexes[i],
+                                 pos=self.simulation_data[2][i],
+                                 font=QtGui.QFont('Helvetica', 14),
+                                 color=QColor(Qt.GlobalColor.magenta))
+            self.addItem(text)
 
     def show_indexes(self):
         for i in range(len(self.tracks_data[self.stage][2])):

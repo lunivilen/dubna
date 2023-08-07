@@ -1,11 +1,13 @@
 from copy import deepcopy
 from itertools import chain
 
+
 def crop_list(listA):
     new_list = deepcopy(listA)
     for i in range(len(new_list)):
         new_list[i] = new_list[i][0]
     return new_list
+
 
 def get_tracks_from_hits(hits):
     # trimmed_hits = crop_list(hits)
@@ -13,40 +15,44 @@ def get_tracks_from_hits(hits):
     tracks_from_hits = {}
     track = []
     for i in range(1, len(trimmed_hits)):
-        if trimmed_hits[i-1][3] == trimmed_hits[i][3] and trimmed_hits[i-1][3] != trimmed_hits[-1][3]:
-            track.append(trimmed_hits[i-1])
-        elif trimmed_hits[i-1][3] != trimmed_hits[-1][3]: 
-            tracks_from_hits[int(trimmed_hits[i-1][3])] = track
+        if trimmed_hits[i - 1][3] == trimmed_hits[i][3] and trimmed_hits[i - 1][3] != trimmed_hits[-1][3]:
+            track.append(trimmed_hits[i - 1])
+        elif trimmed_hits[i - 1][3] != trimmed_hits[-1][3]:
+            tracks_from_hits[int(trimmed_hits[i - 1][3])] = track
             track = []
-        elif trimmed_hits[i-1][3] == trimmed_hits[i][3] and trimmed_hits[i-1][3] == trimmed_hits[-1][3]:
+        elif trimmed_hits[i - 1][3] == trimmed_hits[i][3] and trimmed_hits[i - 1][3] == trimmed_hits[-1][3]:
             tracks_from_hits[int(trimmed_hits[i][3])] = track
-            tracks_from_hits[int(trimmed_hits[i][3])].append(trimmed_hits[i-1])
+            tracks_from_hits[int(trimmed_hits[i][3])].append(trimmed_hits[i - 1])
     return tracks_from_hits
+
 
 def get_hit_chars(tracks, hits):
     tracks_hits = {}
     track_ids = []
-    for i in range(len(tracks)): 
+    for i in range(len(tracks)):
         tracks_hits[i] = []
-        track_ids.append([])
         track_id = []
         for hit in tracks[i]:
-            tracks_hits[i].append(hits[int(hit[3])]) #gets track's hits characteristics from hits list 
-            track_id.append(int(hits[int(hit[3])][3]))
-        track_ids[i] = max(set(track_id), key = track_id.count) 
+            original_hit = hits[int(hit[0])]
+            tracks_hits[i].append(original_hit)  # gets track's hits characteristics from hits list
+            track_id.append(int(original_hit[3]))
+        track_ids.append(max(track_id, key=track_id.count))
     return tracks_hits, track_ids
+
 
 def get_real_matched_tracks(matched_ids, hits, n):
     matched_id = deepcopy(matched_ids)
     real_tracks = get_tracks_from_hits(hits)
     real_matched = []
-    for i in range(1, len(matched_ids)-1):
-        if matched_ids[i-1][1] == matched_ids[i][1] and matched_ids[i-1][0]=='False' and matched_ids[i][0]=='True': 
-            matched_id.remove(matched_ids[i-1])
+    for i in range(1, len(matched_ids) - 1):
+        if matched_ids[i - 1][1] == matched_ids[i][1] and matched_ids[i - 1][0] == 'False' and matched_ids[i][
+            0] == 'True':
+            matched_id.remove(matched_ids[i - 1])
     for i in range(len(list(real_tracks.values()))):
-        if len(list(real_tracks.values())[i])+1 >= n: 
+        if len(list(real_tracks.values())[i]) + 1 >= n:
             real_matched.append(list(real_tracks.values())[i])
     return real_matched
+
 
 def get_matched_tracks(tracks, hits, n, ratio=0.5):
     matched_ids = []
@@ -54,14 +60,17 @@ def get_matched_tracks(tracks, hits, n, ratio=0.5):
     used_ids = []
     tracks_hits, track_ids = get_hit_chars(tracks, hits)
     for i in range(len(tracks)):
-        flat=list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) > ratio:
+        flat = list(chain.from_iterable(tracks_hits[i]))
+        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(flat, key=flat.count)) / len(
+                tracks_hits[i]) > ratio:
             tracks_matched.append(tracks[i])
             used_ids.append(track_ids[i])
-            matched_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
-        elif (['False', track_ids[i]] not in matched_ids) and (['True', track_ids[i]] not in matched_ids): matched_ids.append(['False', track_ids[i]])
+            matched_ids.append(['True', track_ids[i]])  # int(max(set(flat), key = flat.count))
+        elif (['False', track_ids[i]] not in matched_ids) and (['True', track_ids[i]] not in matched_ids):
+            matched_ids.append(['False', track_ids[i]])
     real_matched = get_real_matched_tracks(matched_ids, hits, n)
     return tracks_matched, real_matched
+
 
 def get_fake_tracks(tracks, hits, n=20, ratio=0.5):
     fake_ids = []
@@ -69,16 +78,20 @@ def get_fake_tracks(tracks, hits, n=20, ratio=0.5):
     used_ids = []
     tracks_hits, track_ids = get_hit_chars(tracks, hits)
     for i in range(len(tracks)):
-        flat=list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
+        flat = list(chain.from_iterable(tracks_hits[i]))
+        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key=flat.count)) / len(
+                tracks_hits[i]) < ratio:
             fake_tracks.append(tracks[i])
             used_ids.append(track_ids[i])
-            fake_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
-        elif (['False', track_ids[i]] not in fake_ids) and (['True', track_ids[i]] not in fake_ids): fake_ids.append(['False', track_ids[i]])
+            fake_ids.append(['True', track_ids[i]])  # int(max(set(flat), key = flat.count))
+        elif (['False', track_ids[i]] not in fake_ids) and (['True', track_ids[i]] not in fake_ids):
+            fake_ids.append(['False', track_ids[i]])
     return fake_tracks
 
-def get_efficiency(tracks, hits, min_length, ratio=0.5): #min_length - minimal length of a track 
-    #hits should have 4 characterisrics, fourth being track_id
+
+def get_efficiency(tracks, hits, min_length, ratio=0.5):  # min_length - minimal length of a track
+    # hits should have 4 characteristics, fourth being track_id
+    # formatting hits to 4 characteristics
     tracks_matched, real_matched = get_matched_tracks(tracks, hits, min_length, ratio)
     n_matched = len(tracks_matched)
     n_real = len(real_matched)
@@ -97,6 +110,7 @@ def get_fake_rate(tracks, hits, min_length=20, ratio=0.5):
     print('Number of real selected tracks:', n_real)
     fake_rate = n_fake / n_real
     return fake_rate
+
 
 def get_purity(tracks, hits, min_length=20, ratio=0.5):
     tracks_matched = get_matched_tracks(tracks, hits, min_length, ratio)[0]
@@ -126,5 +140,3 @@ def get_purity(tracks, hits, min_length=20, ratio=0.5):
 #             tracks_rec.append(tracks_numbd[i][j][track_id_loc])
 #             tracks_y_z.append(tracks_numbd[i][j][cut_start:cut_end])
 #     return list(set(tracks_rec)), tracks_y_z                         # [0] - unique tracks, [1] - y, z coords of all tracks
-
-

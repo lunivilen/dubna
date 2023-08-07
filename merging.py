@@ -57,7 +57,6 @@ def angle_sorting(tracks:list):
 
 
 def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
-    count = 0
     start = time()
     print("Starting real merging")
     i = 0
