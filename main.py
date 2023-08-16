@@ -13,10 +13,10 @@ import sys
 from visualizing import MainWindow
 
 result = []
-result.append(get_tracks_data("data/event672.txt", amount_parameters_in_hit=10))
-hits = get_hits_data("data/event672_hits.txt")
+result.append(get_tracks_data("data/selecting_pri_and_sec/event_0_prototracks.txt"))
+hits = get_hits_data("data/selecting_pri_and_sec/event_0_hits.txt")
 
-hits_for_validation = get_hits_data_for_validation("data/event672_hits.txt")
+hits_for_validation = get_hits_data_for_validation("data/selecting_pri_and_sec/event_0_hits.txt")
 
 result.append(cleaning_old(list(map(lambda x: x.copy(), result[0]))))
 result.append(cleaning_new(list(map(lambda x: x.copy(), result[0]))))

@@ -12,23 +12,29 @@ def clear_temp(temp, x_index, y_index, z_index, hit_index):
     return [hit_id, x, y, z]
 
 
-def get_tracks_data(path, amount_parameters_in_hit) -> list:
+def get_tracks_data(path) -> list:
     track_id = 0
     tracks = []
     x_index = 1
     y_index = 2
     z_index = 3
     hit_index = 0
+    amount_parameters_in_hit = 0
 
     with open(path) as f:
         for i in f:
             if 'format' in i:
                 data_format = re.findall(r'\((.*)\)', i)[0].split(', ')
+                amount_parameters_in_hit = len(data_format)
                 x_index = data_format.index('x')
                 y_index = data_format.index('y')
                 z_index = data_format.index('z')
                 hit_index = data_format.index('hit-index')
                 continue
+
+            if not amount_parameters_in_hit:
+                print("The first line in the data file must be of the format: x, y, z, etc.")
+                exit()
 
             temp = []
             tracks.append([])
