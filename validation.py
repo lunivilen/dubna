@@ -79,7 +79,7 @@ def get_fake_tracks(tracks, hits, n=20, ratio=0.5):
     tracks_hits, track_ids = get_hit_chars(tracks, hits)
     for i in range(len(tracks)):
         flat=list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) > n and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
+        if len(tracks[i]) >= n and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
             fake_tracks.append(tracks[i])
             # used_ids.append(track_ids[i])
             fake_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
