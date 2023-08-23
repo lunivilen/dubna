@@ -95,6 +95,8 @@ def get_efficiency(tracks, hits, min_length, ratio=0.5):  # min_length - minimal
     n_real = len(real_matched)
     print('Number of reco tracks:', n_matched)
     print('Number of real selected tracks:', n_real)
+    if not n_real:
+        return 0
     efficiency = n_matched / n_real
     return efficiency
 
@@ -112,6 +114,8 @@ def get_fake_rate(tracks, hits, min_length=20, ratio=0.5):
     n_real = len(get_selected_real(tracks, min_length))
     print('Number of fake tracks:', n_fake)
     print('Number of real selected tracks:', n_real)
+    if not n_real:
+        return 0
     fake_rate = n_fake / n_real
     return fake_rate
 
