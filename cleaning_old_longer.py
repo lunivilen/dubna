@@ -62,7 +62,7 @@ def sort_hits_old(track):
     return list(map(list, track))
 
 
-def cleaning_new(tracks: list):
+def cleaning_old_longer(tracks: list):
     print(f"Before cleaning there are {len(tracks)} tracks")
 
     # Speed up

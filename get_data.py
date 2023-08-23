@@ -1,5 +1,5 @@
 from collections import defaultdict
-from cleaning_new import sort_hits
+from cleaning_old_longer import sort_hits
 import re
 
 
