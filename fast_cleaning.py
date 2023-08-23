@@ -106,23 +106,34 @@ def choose_longer(tracks_dict, tracks_to_unite):
     return tracks
 
 
-def fast_cleaning(tracks):
+# Return to x,y,z and sorting
+def decode(tracks, hits):
+    for i in range(len(tracks)):
+        for j in range(len(tracks[i])):
+            tracks[i][j] = hits[tracks[i][j]]
+        tracks[i] = sort_hits_old(tracks[i])
+    return tracks
+
+
+def fast_cleaning_longer(tracks):
     tracks_dict, tracks_to_unite, graph_to_separate, hits = process_tracks(tracks)
 
-    merged_tracks = unite_tracks(tracks_dict, tracks_to_unite)
     longer_tracks = choose_longer(tracks_dict, tracks_to_unite)
-
-    merged_tracks = tracks_separation(merged_tracks, graph_to_separate)
     longer_tracks = tracks_separation(longer_tracks, graph_to_separate)
-
-    for target in [merged_tracks, longer_tracks]:
-
-        # Return to x,y,z and sorting
-        for i in range(len(target)):
-            for j in range(len(target[i])):
-                target[i][j] = hits[target[i][j]]
-            target[i] = sort_hits_old(target[i])
+    longer_tracks = decode(longer_tracks, hits)
 
     print('Number of tracks after cleaning: ', len(tracks_to_unite))
 
-    return merged_tracks, longer_tracks
+    return longer_tracks
+
+
+def fast_cleaning_merge(tracks):
+    tracks_dict, tracks_to_unite, graph_to_separate, hits = process_tracks(tracks)
+
+    merged_tracks = unite_tracks(tracks_dict, tracks_to_unite)
+    merged_tracks = tracks_separation(merged_tracks, graph_to_separate)
+    merged_tracks = decode(merged_tracks, hits)
+
+    print('Number of tracks after cleaning: ', len(tracks_to_unite))
+
+    return merged_tracks

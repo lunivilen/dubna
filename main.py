@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QApplication
 
-from fast_cleaning import fast_cleaning
+from fast_cleaning import fast_cleaning_merge, fast_cleaning_longer
 from get_data import *
 from cleaning_old_longer import cleaning_old_longer, sort_hits_old
 from cleaning_old_merge import cleaning_old_merge
@@ -20,9 +20,8 @@ hits_for_validation = get_hits_data_for_validation("data/selecting_pri_and_sec/e
 
 result.append(cleaning_old_longer(list(map(lambda x: x.copy(), result[0]))))
 result.append(cleaning_old_merge(list(map(lambda x: x.copy(), result[0]))))
-merged_tracks, longer_tracks = fast_cleaning(list(map(lambda x: x.copy(), result[0])))
-result.append(merged_tracks)
-result.append(longer_tracks)
+result.append(fast_cleaning_merge(list(map(lambda x: x.copy(), result[0]))))
+result.append(fast_cleaning_longer(list(map(lambda x: x.copy(), result[0]))))
 # result.append(merging(list(map(lambda x: x.copy(), result[1])),
 #                       allowable_angle=160,
 #                       allowable_length=700,
@@ -31,7 +30,7 @@ result.append(longer_tracks)
 # result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=150))
 # save_data(tracks)
 
-result.append(get_tracks_data("data/event672_mpdroot.txt"))
+# result.append(get_tracks_data("data/event672_mpdroot.txt"))
 
 # Computation efficiency
 for i in range(len(result)):
@@ -43,8 +42,8 @@ for i in range(len(result)):
             for hit_id in range(len(result[i][track_id])):
                 result[i][track_id][hit_id] = result[i][track_id][hit_id][1:]
 
-# if __name__ == '__main__':
-#     app = QApplication(sys.argv)
-#     plot = MainWindow(result, hits)
-#     plot.show()
-#     sys.exit(app.exec())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    plot = MainWindow(result, hits)
+    plot.show()
+    sys.exit(app.exec())
