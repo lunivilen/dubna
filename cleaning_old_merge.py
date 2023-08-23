@@ -19,8 +19,7 @@ def merge_tracks(track_one: list, track_two: list):
 def separate_tracks(track_one: list, track_two: list):
     for point in track_two:
         if point in track_one:
-            track_two.remove(point)
-    return track_one
+            track_one.remove(point)
 
 
 def sort_hits(points):
@@ -49,15 +48,15 @@ def sort_hits(points):
 
 def sort_hits_old(track):
     df = pd.DataFrame(track, columns=[*range(len(track[0]))])
-    scatter_x = df[0].max() - df[0].min()
-    scatter_y = df[1].max() - df[1].min()
-    scatter_z = df[2].max() - df[2].min()
+    scatter_x = df[1].max() - df[1].min()
+    scatter_y = df[2].max() - df[2].min()
+    scatter_z = df[3].max() - df[3].min()
     if max(scatter_x, scatter_y, scatter_z) == scatter_x:
-        track = list(df.sort_values(0, ascending=abs(df[0].max()) > abs(df[0].min())).values)
-    elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
         track = list(df.sort_values(1, ascending=abs(df[1].max()) > abs(df[1].min())).values)
-    else:
+    elif max(scatter_x, scatter_y, scatter_z) == scatter_y:
         track = list(df.sort_values(2, ascending=abs(df[2].max()) > abs(df[2].min())).values)
+    else:
+        track = list(df.sort_values(3, ascending=abs(df[3].max()) > abs(df[3].min())).values)
     return list(map(list, track))
 
 
@@ -124,7 +123,7 @@ def cleaning_old_merge(tracks: list):
     while i < len(tracks):
         for j in range(len(tracks)):
             if i != j:
-                tracks[i] = separate_tracks(tracks[i], tracks[j])
+                separate_tracks(tracks[i], tracks[j])
         if len(tracks[i]) < 1:
             tracks.pop(i)
         else:
