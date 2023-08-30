@@ -78,12 +78,13 @@ def get_fake_tracks(tracks, hits, n=20, ratio=0.5):
     used_ids = []
     tracks_hits, track_ids = get_hit_chars(tracks, hits)
     for i in range(len(tracks)):
-        flat=list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) >= n and flat.count(max(set(flat), key = flat.count)) / len(tracks_hits[i]) < ratio:
+        flat = list(chain.from_iterable(tracks_hits[i]))
+        if len(tracks[i]) >= n and flat.count(max(set(flat), key=flat.count)) / len(tracks_hits[i]) < ratio:
             fake_tracks.append(tracks[i])
             # used_ids.append(track_ids[i])
-            fake_ids.append(['True', track_ids[i]]) #int(max(set(flat), key = flat.count))
-        elif (['False', track_ids[i]] not in fake_ids) and (['True', track_ids[i]] not in fake_ids): fake_ids.append(['False', track_ids[i]])
+            fake_ids.append(['True', track_ids[i]])  # int(max(set(flat), key = flat.count))
+        elif (['False', track_ids[i]] not in fake_ids) and (['True', track_ids[i]] not in fake_ids):
+            fake_ids.append(['False', track_ids[i]])
     return fake_tracks, fake_ids
 
 
@@ -100,12 +101,14 @@ def get_efficiency(tracks, hits, min_length, ratio=0.5):  # min_length - minimal
     efficiency = n_matched / n_real
     return efficiency
 
+
 def get_selected_real(tracks, min_length):
     selected_tracks = []
     for track in tracks:
-        if len(track)>min_length:
+        if len(track) > min_length:
             selected_tracks.append(track)
     return selected_tracks
+
 
 def get_fake_rate(tracks, hits, min_length=20, ratio=0.5):
     fake_tracks = get_fake_tracks(tracks, hits, min_length, ratio)[0]
@@ -128,6 +131,37 @@ def get_purity(tracks, hits, min_length=20, ratio=0.5):
     print('Number of real reco tracks:', n_matched)
     print('Number of reco tracks:', n_reco)
     return purity
+
+
+def get_duplicated_tracks(tracks, hits, n=20, ratio=0.5):
+    duplicated_ids = []
+    tracks_duplicated = []
+    used_ids = []
+    tracks_hits, track_ids = get_hit_chars(tracks, hits)
+    for i in range(len(tracks)):
+        flat = list(chain.from_iterable(tracks_hits[i]))
+        if len(tracks[i]) >= n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key=flat.count)) / len(
+                tracks_hits[i]) >= ratio:
+            used_ids.append(track_ids[i])
+        elif len(tracks[i]) >= n and (track_ids[i] in used_ids) and flat.count(max(set(flat), key=flat.count)) / len(
+                tracks_hits[i]) >= ratio:
+            tracks_duplicated.append(tracks[i])
+            duplicated_ids.append(['True', track_ids[i]])  # int(max(set(flat), key = flat.count))
+        elif (['False', track_ids[i]] not in duplicated_ids) and (['True', track_ids[i]] not in duplicated_ids):
+            duplicated_ids.append(['False', track_ids[i]])
+    return tracks_duplicated
+
+
+def get_duplication_rate(tracks, hits, min_length=9, ratio=0.5):
+    tracks_duplicated = get_duplicated_tracks(tracks, hits, min_length, ratio)
+    n_duplicated = len(tracks_duplicated)
+    n_reco = len(tracks)
+    if not n_reco:
+        return 0
+    duplication_rate = n_duplicated / n_reco
+    print('Number of real reco tracks:', n_duplicated)
+    print('Number of reco tracks:', n_reco)
+    return duplication_rate
 
 # def add_track_number(tracks):
 #     tracks_numbd = deepcopy(tracks)
