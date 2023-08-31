@@ -61,7 +61,7 @@ def get_matched_tracks(tracks, hits, n, ratio=0.5):
     tracks_hits, track_ids = get_hit_chars(tracks, hits)
     for i in range(len(tracks)):
         flat = list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) > n and (track_ids[i] not in used_ids) and flat.count(max(flat, key=flat.count)) / len(
+        if len(tracks[i]) >= n and (track_ids[i] not in used_ids) and flat.count(max(flat, key=flat.count)) / len(
                 tracks_hits[i]) > ratio:
             tracks_matched.append(tracks[i])
             used_ids.append(track_ids[i])
@@ -105,7 +105,7 @@ def get_efficiency(tracks, hits, min_length, ratio=0.5):  # min_length - minimal
 def get_selected_real(tracks, min_length):
     selected_tracks = []
     for track in tracks:
-        if len(track) > min_length:
+        if len(track) >= min_length:
             selected_tracks.append(track)
     return selected_tracks
 
