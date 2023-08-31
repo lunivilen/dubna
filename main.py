@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from PyQt6.QtWidgets import QApplication
 
 from fast_cleaning import fast_cleaning_merge, fast_cleaning_longer
@@ -12,30 +14,29 @@ import sys
 
 from visualizing import MainWindow
 
-result = []
-result.append(get_tracks_data("data/selecting_pri_and_sec/event_0_prototracks.txt"))
-hits = get_hits_data("data/selecting_pri_and_sec/event_0_hits.txt")
+result = [get_tracks_data("data/event_0_prototracks.txt", "data/event_0_space_points.txt")]
+hits = get_hits_data("data/event_0_space_points.txt")
+hits_for_validation = get_hits_data_for_validation("data/event_0_space_points.txt")
+track_id_list = get_track_id("data/event_0_trackIds.txt")
 
-hits_for_validation = get_hits_data_for_validation("data/selecting_pri_and_sec/event_0_hits.txt")
-
-result.append(cleaning_old_longer(list(map(lambda x: x.copy(), result[0]))))
-result.append(cleaning_old_merge(list(map(lambda x: x.copy(), result[0]))))
-result.append(fast_cleaning_merge(list(map(lambda x: x.copy(), result[0]))))
-result.append(fast_cleaning_longer(list(map(lambda x: x.copy(), result[0]))))
-# result.append(merging(list(map(lambda x: x.copy(), result[1])),
+# result.append(cleaning_old_longer(deepcopy(result[0])))
+# result.append(cleaning_old_merge(deepcopy(result[0])))
+# result.append(fast_cleaning_merge(deepcopy(result[0])))
+# result.append(fast_cleaning_longer(deepcopy(result[0])))
+# result.append(merging(deepcopy(result[1]),
 #                       allowable_angle=160,
 #                       allowable_length=700,
 #                       allowable_distance=35))
-# result.append(remove_outliers(list(map(lambda x: x.copy(), result[2]))))
-# result.append(smoothing(list(map(lambda x: x.copy(), result[3])), smooth_scale=150))
+# result.append(remove_outliers(deepcopy(result[2])))
+# result.append(smoothing(deepcopy(result[3]), smooth_scale=150))
 # save_data(tracks)
 
 # result.append(get_tracks_data("data/event672_mpdroot.txt"))
 
 # Computation efficiency
 for i in range(len(result)):
-    print(f"Эффективность {i}: {get_efficiency(result[i], hits_for_validation, min_length=9)}")
-    print(f"Рассчёт фейков {i}: {get_fake_rate(result[i], hits_for_validation)}\n\n")
+    # print(f"Эффективность {i}: {get_efficiency(result[i], hits_for_validation, track_id_list)}")
+    print(f"Рассчёт фейков {i}: {get_fake_rate(result[i], hits_for_validation, track_id_list)}\n\n")
 
     if len(result[i][0][0]) > 3:
         for track_id in range(len(result[i])):
