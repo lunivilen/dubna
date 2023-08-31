@@ -35,8 +35,8 @@ track_id_list = get_track_id("data/event_0_trackIds.txt")
 
 # Computation efficiency
 for i in range(len(result)):
-    # print(f"Эффективность {i}: {get_efficiency(result[i], hits_for_validation, track_id_list)}")
-    print(f"Рассчёт фейков {i}: {get_fake_rate(result[i], hits_for_validation, track_id_list)}\n\n")
+    print(f"Эффективность {i}: {get_efficiency(result[i], track_id_list, min_length=9)}")
+    # print(f"Рассчёт фейков {i}: {get_fake_rate(result[i], hits_for_validation, track_id_list)}\n\n")
 
     if len(result[i][0][0]) > 3:
         for track_id in range(len(result[i])):
