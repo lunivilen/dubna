@@ -2,7 +2,6 @@ from cleaning_old_merge import sort_hits_old
 from time import time
 import numpy as np
 import math
-from copy import deepcopy
 
 
 def get_vector(hit_1, hit_2):
@@ -49,14 +48,38 @@ def distance_to_line(m0, m1, m_check):
 
 def angle_sorting(tracks: list):
     start = time()
-    print("Sorting start")
+    # print("Sorting start")
+    tracks_start = {}
+    # tracks_end = {}
+    for i in range(len(tracks)):
+        if len(tracks[i]) > 1:
+            vec_start = get_vector(tracks[i][0][1:4], tracks[i][1][1:4])
+            # vec_end = get_vector(tracks[i][len(tracks[i])-2][1:4], tracks[i][len(tracks[i])-1][1:4])
+            tracks_start[i] = [tracks[i], get_track_angle(vec_start)]
+            # tracks_end[i] = [tracks[i], get_track_angle(vec_end)]
+        else:
+            tracks_start[i] = [tracks[i], 1]
+        # tracks_end[i] = [tracks[i], 1]
+    tracks_start = dict(sorted(tracks_start.items(), key=lambda x: x[1][1], reverse=False))
+    # tracks_end = dict(sorted(tracks_end.items(), key=lambda x: x[1][1], reverse=False))
+    sorted_tracks = list(tracks_start.values())
+    for i in range(len(sorted_tracks)): sorted_tracks[i] = sorted_tracks[i][0]
+    #     tracks_end[i].pop(1)
+    # for i in range(len(sorted_tracks)):
+    #     sorted_tracks[i] = sorted_tracks[i][0]
+    print(f"Sorting completed in {time() - start} seconds")
+    return sorted_tracks  # , tracks_end
+
+
+def angle_sorting_both(tracks: list):
+    start = time()
+    # print("Sorting start")
     tracks_start = {}
     tracks_end = {}
     for i in range(len(tracks)):
         if len(tracks[i]) > 1:
             vec_start = get_vector(tracks[i][0][1:4], tracks[i][1][1:4])
-            vec_end = get_vector(tracks[i][len(tracks[i]) - 2][1:4], tracks[i][len(tracks[i]) - 1][1:4])
-
+            vec_end = get_vector(tracks[i][len(tracks[i])-2][1:4], tracks[i][len(tracks[i])-1][1:4])
             tracks_start[i] = [tracks[i], get_track_angle(vec_start)]
             tracks_end[i] = [tracks[i], get_track_angle(vec_end)]
         else:
@@ -64,14 +87,19 @@ def angle_sorting(tracks: list):
             tracks_end[i] = [tracks[i], 1]
     tracks_start = dict(sorted(tracks_start.items(), key=lambda x: x[1][1], reverse=False))
     tracks_end = dict(sorted(tracks_end.items(), key=lambda x: x[1][1], reverse=False))
+    tracks_start = list(tracks_start.values())
+    tracks_end = list(tracks_end.values())
     for i in range(len(tracks_start)):
-        tracks_start[i].pop(1)
-        tracks_end[i].pop(1)
+        tracks_start[i] = tracks_start[i][0]
+        tracks_end[i] = tracks_end[i][0]
+    #     tracks_end[i].pop(1)
+    # for i in range(len(sorted_tracks)):
+    #     sorted_tracks[i] = sorted_tracks[i][0]
     print(f"Sorting completed in {time() - start} seconds")
     return tracks_start, tracks_end
 
-
-def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
+def merge_og(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
+    count = 0
     start = time()
     print("Starting real merging")
     i = 0
@@ -131,11 +159,89 @@ def merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_d
     print(f"After merging there are {len(tracks)} tracks")
     return tracks
 
+def merge(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
+    count = 0
+    start = time()
+    print("Starting real merging")
+    i = 0
+    sorted_tracks = angle_sorting(tracks)
+    while i < len(sorted_tracks):
+        if len(sorted_tracks[i]) < 2:
+            i += 1
+            continue
+        j = 0
+        # Get vector of the first track
+        if len(sorted_tracks[i]) == 2: vec_1 = get_vector(sorted_tracks[i][0], sorted_tracks[i][1])
+        else: vec_1 = average_vec([sorted_tracks[i][k] for k in range(3)])
+
+        while j < len(sorted_tracks) and i < len(sorted_tracks):
+            # Check length of tracks
+            if len(sorted_tracks[j]) < 2 or len(sorted_tracks[i]) < 2 or i == j:
+                j += 1
+                continue
+
+            # Check distance between tracks
+            vec_a = get_vector(sorted_tracks[i][0], sorted_tracks[j][-1])
+            if get_vector_length(vec_a) > allowable_length:
+                j += 1
+                continue
+
+            # Discarding not co-directed tracks
+            if not co_directed(sorted_tracks[i], sorted_tracks[j]):
+                j += 1
+                continue
+
+            # Get vector of the second track
+            if len(sorted_tracks[j]) == 2: vec_2 = get_vector(sorted_tracks[j][-1], sorted_tracks[j][-2])
+            else:  vec_2 = average_vec([sorted_tracks[j][-k] for k in range(1, 4)])
+
+            # Check angele between tracks
+            if angle_between_vec(vec_1, vec_2) > allowable_angle:
+                j += 1
+                continue
+
+            # Check distance between straight lines formed by tracks
+            distance = distance_to_line(np.array(sorted_tracks[i][0][0:3]), np.array(sorted_tracks[i][1][0:3]), np.array(sorted_tracks[j][-1][0:3]))
+            if distance < allowable_distance:
+                sorted_tracks[i].extend(sorted_tracks[j])
+                sorted_tracks[i] = sort_hits_old(sorted_tracks[i])
+                sorted_tracks.pop(j)
+                i -= 1
+                break
+            else: j += 1
+        i += 1
+    print(f"Real merging completed in {time() - start} seconds")
+    print(f"After merging there are {len(sorted_tracks)} tracks")
+    return sorted_tracks
+
 
 def find_key(dict, track_dict):
     for key, track in dict.iteritems():
         if track == track_dict:
             return key
+
+def super_fast_merging(tracks, allowable_length=700, allowable_diff = 15):
+    start = time()
+    merged_tracks = []
+    print("Starting real merging")
+    tracks_start, tracks_end = angle_sorting_both(tracks)
+    for i in range(len(tracks_end)):
+        merged_tracks.append(tracks_end[i][0])
+        if len(tracks_end[i][0]) < 2:
+            i += 1
+            continue
+        for j in range(len(tracks_start)):
+            if tracks_end[i][1] - tracks_start[i][1] > allowable_diff:
+                j += 1
+                continue
+            vec_a = get_vector(np.asarray(tracks_end[i][0][0]), np.asarray(tracks_start[j][0][-1]))
+            if get_vector_length(vec_a) > allowable_length:
+                j += 1
+                continue
+            merged_tracks[i].append(tracks_start[i][0])
+    print(f"Real merging completed in {time() - start} seconds")
+    print(f"After merging there are {len(merged_tracks)} tracks")
+    return merged_tracks
 
 
 def fast_merging(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
