@@ -43,7 +43,7 @@ def get_real_matched_tracks(hits, n):
     real_tracks = get_tracks_from_hits(hits)
     real_matched = []
     for i in range(len(list(real_tracks.values()))):
-        if len(list(real_tracks.values())[i]) + 1 >= n:
+        if len(list(real_tracks.values())[i]) >= n:
             real_matched.append(list(real_tracks.values())[i])
     return real_matched
 
