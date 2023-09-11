@@ -1,1 +1,0 @@
-# format: (x, y, z, hit-index, phi, theta, q/p, t, chi2, seed-index)+
