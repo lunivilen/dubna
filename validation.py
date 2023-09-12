@@ -1,164 +1,84 @@
-from copy import deepcopy
-from itertools import chain
+import pandas as pd
 
 
-def crop_list(listA):
-    new_list = deepcopy(listA)
-    for i in range(len(new_list)):
-        new_list[i] = new_list[i][0]
-    return new_list
-
-
-def get_tracks_from_hits(hits):
-    trimmed_hits = sorted(hits, key=lambda x: x[3], reverse=False)
-    tracks_from_hits = {}
-    track = []
-    for i in range(1, len(trimmed_hits)):
-        if trimmed_hits[i - 1][3] == trimmed_hits[i][3] and trimmed_hits[i - 1][3] != trimmed_hits[-1][3]:
-            track.append(trimmed_hits[i - 1])
-        elif trimmed_hits[i - 1][3] != trimmed_hits[-1][3]:
-            tracks_from_hits[int(trimmed_hits[i - 1][3])] = track
-            track = []
-        elif trimmed_hits[i - 1][3] == trimmed_hits[i][3] and trimmed_hits[i - 1][3] == trimmed_hits[-1][3]:
-            tracks_from_hits[int(trimmed_hits[i][3])] = track
-            tracks_from_hits[int(trimmed_hits[i][3])].append(trimmed_hits[i - 1])
-    return tracks_from_hits
-
-
-def get_hit_chars(tracks, hits):
+def replace_hits_to_track_id(tracks, hits):
     tracks_hits = {}
-    track_ids = []
     for i in range(len(tracks)):
         tracks_hits[i] = []
-        track_id = []
         for hit in tracks[i]:
-            original_hit = hits[int(hit[0])]
-            tracks_hits[i].append(original_hit)  # gets track's hits characteristics from hits list
-            track_id.append(int(original_hit[3]))
-        track_ids.append(max(track_id, key=track_id.count))
-    return tracks_hits, track_ids
+            hit_id = hit[0]
+            truth_track_id = int(hits[hit_id][3])
+            tracks_hits[i].append(truth_track_id)
+    return tracks_hits
 
 
-def get_real_matched_tracks(hits, n):
-    real_tracks = get_tracks_from_hits(hits)
-    real_matched = []
-    for i in range(len(list(real_tracks.values()))):
-        if len(list(real_tracks.values())[i]) >= n:
-            real_matched.append(list(real_tracks.values())[i])
-    return real_matched
+def get_real_tracks(track_dict, n):
+    real_track_list = []
+    for tack_id, hit_list in track_dict.items():
+        if len(hit_list) >= n:
+            real_track_list.append(tack_id)
+    return real_track_list
 
 
-def get_matched_tracks(tracks, hits, n, ratio=0.5):
-    tracks_matched = []
-    used_ids = []
-    tracks_hits, track_ids = get_hit_chars(tracks, hits)
+def get_characteristics(tracks, hits, n, ratio):
+    reco_tracks = set()
+    fake_tracks = set()
+    duplicate_tracks = []
+
+    # Replace hits in track with id of their real track
+    tracks_hits = replace_hits_to_track_id(tracks, hits)
     for i in range(len(tracks)):
-        flat = list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) >= n and (track_ids[i] not in used_ids) and flat.count(max(flat, key=flat.count)) / len(
-                tracks_hits[i]) > ratio:
-            tracks_matched.append(tracks[i])
-            used_ids.append(track_ids[i])
-    return tracks_matched
+        if len(tracks[i]) < n:
+            continue
+
+        # Find the most common real track id in reco track
+        reco_track_id = max(tracks_hits[i], key=tracks_hits[i].count)
+
+        # Check duplicates
+        if reco_track_id in reco_tracks:
+            duplicate_tracks.append(reco_track_id)
+            continue
+
+        # Check ration and mark track as reco or fake
+        if tracks_hits[i].count(reco_track_id) / len(tracks_hits[i]) >= ratio:
+            reco_tracks.add(reco_track_id)
+        else:
+            fake_tracks.add(i)
+    return reco_tracks, fake_tracks, duplicate_tracks
 
 
-def get_fake_tracks(tracks, hits, n=9, ratio=0.5):
-    fake_tracks = []
-    tracks_hits = get_hit_chars(tracks, hits)[0]
-    for i in range(len(tracks)):
-        flat = list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) >= n and flat.count(max(set(flat), key=flat.count)) / len(tracks_hits[i]) < ratio:
-            fake_tracks.append(tracks[i])
-    return fake_tracks
+def calc_characteristics(tracks, hit_list, track_dict, secondary_track_list=None, min_length=9, ratio=0.5):
+    # Get all lists of necessary data
+    reco_track_list, fake_track_list, duplicate_track_list = get_characteristics(tracks, hit_list, min_length, ratio)
+    real_track_list = get_real_tracks(track_dict, min_length)
+
+    # Remove secondary track id from data if in necessary
+    if secondary_track_list:
+        for info_list in [reco_track_list, duplicate_track_list, real_track_list]:
+            for track_id in secondary_track_list:
+                if track_id in info_list:
+                    info_list.remove(track_id)
+
+    # Save table of reco and not reco tracks
+    # save_recognised_logo(reco_track_list, real_track_list)
+
+    # Calc characteristics
+    num_real_track = len(real_track_list)
+    num_proto_track = len(tracks)
+
+    characteristic_dict = {
+        "efficiency": len(reco_track_list) / num_real_track if num_real_track else 0,
+        "fake_rate": len(fake_track_list) / num_real_track if num_real_track else 0,
+        "duplication_rate": len(duplicate_track_list) / num_proto_track if num_real_track else 0,
+        "purity": num_real_track / num_proto_track if num_proto_track else 0
+    }
+    return characteristic_dict
 
 
-def get_efficiency(tracks, hits, min_length, ratio=0.5):  # min_length - minimal length of a track
-    # hits should have 4 characterisrics, fourth being track_id
-    tracks_matched = get_matched_tracks(tracks, hits, min_length, ratio)
-    real_matched = get_real_matched_tracks(hits, min_length)
-    n_matched = len(tracks_matched)
-    n_real = len(real_matched)
-    print('Number of reco tracks:', n_matched)
-    print('Number of real selected tracks:', n_real)
-    if not n_real:
-        return 0
-    efficiency = n_matched / n_real
-    return efficiency
-
-
-def get_selected_real(tracks, min_length):
-    selected_tracks = []
-    for track in tracks:
-        if len(track) >= min_length:
-            selected_tracks.append(track)
-    return selected_tracks
-
-
-def get_fake_rate(tracks, hits, min_length=20, ratio=0.5):
-    fake_tracks = get_fake_tracks(tracks, hits, min_length, ratio)
-    n_fake = len(fake_tracks)
-    n_real = len(get_selected_real(tracks, min_length))
-    print('Number of fake tracks:', n_fake)
-    print('Number of real selected tracks:', n_real)
-    if not n_real:
-        return 0
-    fake_rate = n_fake / n_real
-    return fake_rate
-
-
-def get_purity(tracks, hits, min_length=20, ratio=0.5):
-    tracks_matched = get_matched_tracks(tracks, hits, min_length, ratio)
-    n_matched = len(tracks_matched)
-    n_reco = len(tracks)
-    if not n_reco:
-        return 0
-    purity = n_matched / n_reco
-    print('Number of real reco tracks:', n_matched)
-    print('Number of reco tracks:', n_reco)
-    return purity
-
-
-def get_duplicated_tracks(tracks, hits, n=20, ratio=0.5):
-    tracks_duplicated = []
-    used_ids = []
-    tracks_hits, track_ids = get_hit_chars(tracks, hits)
-    for i in range(len(tracks)):
-        flat = list(chain.from_iterable(tracks_hits[i]))
-        if len(tracks[i]) >= n and (track_ids[i] not in used_ids) and flat.count(max(set(flat), key=flat.count)) / len(
-                tracks_hits[i]) >= ratio:
-            used_ids.append(track_ids[i])
-        elif len(tracks[i]) >= n and (track_ids[i] in used_ids) and flat.count(max(set(flat), key=flat.count)) / len(
-                tracks_hits[i]) >= ratio:
-            tracks_duplicated.append(tracks[i])
-    return tracks_duplicated
-
-
-def get_duplication_rate(tracks, hits, min_length=9, ratio=0.5):
-    tracks_duplicated = get_duplicated_tracks(tracks, hits, min_length, ratio)
-    n_duplicated = len(tracks_duplicated)
-    n_reco = len(tracks)
-    if not n_reco:
-        return 0
-    duplication_rate = n_duplicated / n_reco
-    print('Number of real reco tracks:', n_duplicated)
-    print('Number of reco tracks:', n_reco)
-    return duplication_rate
-
-# def add_track_number(tracks):
-#     tracks_numbd = deepcopy(tracks)
-#     for i in range(len(tracks_numbd)):
-#         for track in tracks_numbd[i]:
-#             track.insert(0, i)
-#     return tracks_numbd
-
-# def get_unique_tracks_and_coords(tracks,
-#                                  track_id_loc: int,
-#                                  cut_start: int,
-#                                  cut_end: int):       # track_id_loc - location of a track_id in a list,track_id_loc= 0 for tracks,track_id_loc= 3 for hits
-#     tracks_numbd = add_track_number(tracks)
-#     tracks_rec = []                                   # cut_start:cut_end - cut of y and z coords; for tracks cut_start=2, cut_end=4; for hits cut_start=1, cut_end=3
-#     tracks_y_z = []
-#     for i in range(len(tracks_numbd)):
-#         for j in range(len(tracks_numbd[i])):
-#             tracks_rec.append(tracks_numbd[i][j][track_id_loc])
-#             tracks_y_z.append(tracks_numbd[i][j][cut_start:cut_end])
-#     return list(set(tracks_rec)), tracks_y_z                         # [0] - unique tracks, [1] - y, z coords of all tracks
+def save_recognised_logo(reco_track_list, real_track_list):
+    result_df = pd.DataFrame(columns=["track_id", "is_reco"])
+    for i, track_id in enumerate(real_track_list):
+        result_df.at[i, "track_id"] = track_id
+        result_df.at[i, "is_reco"] = track_id in reco_track_list
+    result_df = result_df.sort_values(by=["is_reco"])
+    result_df.to_csv("logo.csv", index=False)

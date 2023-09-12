@@ -49,7 +49,7 @@ def get_hits_data(path_hits) -> dict:
                 continue
 
             hit = list(map(float, i.split(", ")))
-            hits[str(hit[3])].append(hit[:3])
+            hits[int(hit[3])].append(hit[:3])
 
     for id_track in hits.keys():
         hits[id_track] = sort_hits(hits[id_track])
@@ -68,13 +68,14 @@ def get_hits_data_for_validation(path_hits) -> list:
     return hits
 
 
-def get_track_id(path) -> dict:
-    track_id_dict = {}
+def get_secondary_track(path) -> list:
+    secondary_track_list = []
     with open(path) as f:
         for i in f:
             if 'format' in i:
                 continue
 
             info = list(map(int, i.split(", ")))
-            track_id_dict[info[0]] = info[1]
-    return track_id_dict
+            if not info[1]:
+                secondary_track_list.append(info[0])
+    return secondary_track_list

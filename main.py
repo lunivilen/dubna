@@ -1,23 +1,20 @@
 from copy import deepcopy
 
 from PyQt6.QtWidgets import QApplication
-
+from validation import calc_characteristics
 from fast_cleaning import fast_cleaning_merge, fast_cleaning_longer
 from get_data import *
 from cleaning_old_longer import cleaning_old_longer, sort_hits_old
 from cleaning_old_merge import cleaning_old_merge
-from merging import merging
-
-from validation import get_efficiency, get_fake_rate
 
 import sys
 
 from visualizing import MainWindow
 
 result = [get_tracks_data("data/event_0_prototracks.txt", "data/event_0_space_points.txt")]
-hits = get_hits_data("data/event_0_space_points.txt")
-hits_for_validation = get_hits_data_for_validation("data/event_0_space_points.txt")
-track_id_list = get_track_id("data/event_0_trackIds.txt")
+track_dict = get_hits_data("data/event_0_space_points.txt")
+hit_list = get_hits_data_for_validation("data/event_0_space_points.txt")
+secondary_track_list = get_secondary_track("data/event_0_trackIds.txt")
 
 # result.append(cleaning_old_longer(deepcopy(result[0])))
 # result.append(cleaning_old_merge(deepcopy(result[0])))
@@ -35,8 +32,10 @@ track_id_list = get_track_id("data/event_0_trackIds.txt")
 
 # Computation efficiency
 for i in range(len(result)):
-    print(f"Эффективность {i}: {get_efficiency(result[i], hits_for_validation, min_length=9)}")
-    # print(f"Рассчёт фейков {i}: {get_fake_rate(result[i], hits_for_validation, track_id_list)}\n\n")
+    characteristic_dict = calc_characteristics(result[i], hit_list, track_dict, secondary_track_list)
+
+    for characteristic, value in characteristic_dict.items():
+        print(f"{characteristic}: {value}\n")
 
     if len(result[i][0][0]) > 3:
         for track_id in range(len(result[i])):
@@ -45,6 +44,6 @@ for i in range(len(result)):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    plot = MainWindow(result, hits)
+    plot = MainWindow(result, track_dict)
     plot.show()
     sys.exit(app.exec())
