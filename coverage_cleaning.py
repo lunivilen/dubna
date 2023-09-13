@@ -1,4 +1,4 @@
-def coating_cleaning(tracks: list, new_hits_ratio=0.5, new_hits_in_row=9):
+def coverage_cleaning(tracks: list, new_hits_ratio=0.5, new_hits_in_row=9):
     # Track candidates ordered by descending length.
     track_candidates = sorted(tracks, key=len, reverse=True)
 
