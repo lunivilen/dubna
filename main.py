@@ -2,10 +2,10 @@ from copy import deepcopy
 
 from PyQt6.QtWidgets import QApplication
 from validation import calc_characteristics
-from fast_cleaning import fast_cleaning_merge, fast_cleaning_longer
+from fast_cleaning import fast_merging_logical, fast_cleaning_longer
 from get_data import *
-from cleaning_old_longer import cleaning_old_longer, sort_hits_old
-from cleaning_old_merge import cleaning_old_merge
+from cleaning_longer import cleaning_longer, sort_hits_old
+from merging_logical import merging_logical
 
 import sys
 
@@ -16,9 +16,9 @@ track_dict = get_hits_data("data/event_0_space_points.txt")
 hit_list = get_hits_data_for_validation("data/event_0_space_points.txt")
 secondary_track_list = get_secondary_track("data/event_0_trackIds.txt")
 
-# result.append(cleaning_old_longer(deepcopy(result[0])))
-# result.append(cleaning_old_merge(deepcopy(result[0])))
-# result.append(fast_cleaning_merge(deepcopy(result[0])))
+# result.append(cleaning_longer(deepcopy(result[0])))
+# result.append(merging_logical(deepcopy(result[0])))
+# result.append(fast_merging_logical(deepcopy(result[0])))
 # result.append(fast_cleaning_longer(deepcopy(result[0])))
 # result.append(merging(deepcopy(result[1]),
 #                       allowable_angle=160,

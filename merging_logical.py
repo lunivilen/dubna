@@ -60,7 +60,7 @@ def sort_hits_old(track):
     return list(map(list, track))
 
 
-def cleaning_old_merge(tracks: list):
+def merging_logical(tracks: list):
     print(f"Before cleaning there are {len(tracks)} tracks")
 
     # Speed up
