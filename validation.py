@@ -70,7 +70,7 @@ def calc_characteristics(tracks, hit_list, track_dict, secondary_track_list=None
         "efficiency": len(reco_track_list) / num_real_track if num_real_track else 0,
         "fake_rate": len(fake_track_list) / num_real_track if num_real_track else 0,
         "duplication_rate": len(duplicate_track_list) / num_proto_track if num_real_track else 0,
-        "purity": num_real_track / num_proto_track if num_proto_track else 0
+        "purity": len(reco_track_list) / num_proto_track if num_proto_track else 0
     }
     return characteristic_dict
 
