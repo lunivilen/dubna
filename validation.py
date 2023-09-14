@@ -2,11 +2,11 @@ import pandas as pd
 
 
 def replace_hits_to_track_id(tracks, hits):
-    tracks_hits = {}
+    tracks_hits = []
     for i in range(len(tracks)):
-        tracks_hits[i] = []
+        tracks_hits.append([])
         for hit in tracks[i]:
-            hit_id = hit[0]
+            hit_id = int(hit[0])
             truth_track_id = int(hits[hit_id][3])
             tracks_hits[i].append(truth_track_id)
     return tracks_hits
