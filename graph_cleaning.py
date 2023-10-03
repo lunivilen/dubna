@@ -1,6 +1,6 @@
 from time import time
 from collections import defaultdict
-from cleaning_longer import separate_tracks, sort_hits_old
+from direct_cleaning import separate_tracks, sort_hits_old
 
 
 def count_tracks_intersections(all_tracks: dict):
@@ -115,7 +115,7 @@ def decode(tracks, hits):
     return tracks
 
 
-def fast_cleaning_longer(tracks):
+def graph_cleaning(tracks):
     tracks_dict, tracks_to_unite, graph_to_separate, hits = process_tracks(tracks)
 
     longer_tracks = choose_longer(tracks_dict, tracks_to_unite)
@@ -127,7 +127,7 @@ def fast_cleaning_longer(tracks):
     return longer_tracks
 
 
-def fast_merging_logical(tracks):
+def graph_merging(tracks):
     tracks_dict, tracks_to_unite, graph_to_separate, hits = process_tracks(tracks)
 
     merged_tracks = unite_tracks(tracks_dict, tracks_to_unite)
