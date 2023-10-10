@@ -1,5 +1,5 @@
 from collections import defaultdict
-from cleaning_longer import sort_hits
+from direct_cleaning import sort_hits
 import re
 
 
@@ -68,14 +68,13 @@ def get_hits_data_for_validation(path_hits) -> list:
     return hits
 
 
-def get_secondary_track(path) -> list:
-    secondary_track_list = []
+def get_track_id(path) -> dict:
+    track_id_dict = {}
     with open(path) as f:
         for i in f:
             if 'format' in i:
                 continue
 
             info = list(map(int, i.split(", ")))
-            if not info[1]:
-                secondary_track_list.append(info[0])
-    return secondary_track_list
+            track_id_dict[info[0]] = info[1]
+    return track_id_dict

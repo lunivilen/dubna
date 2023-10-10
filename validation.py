@@ -36,7 +36,7 @@ def get_characteristics(tracks, hits, n, ratio):
         reco_track_id = max(tracks_hits[i], key=tracks_hits[i].count)
 
         if tracks_hits[i].count(reco_track_id) / len(tracks_hits[i]) >= ratio:
-            reco_dupl_tracks.add(reco_track_id)
+            reco_dupl_tracks.append(reco_track_id)
 
         # Check duplicates
         if reco_track_id in reco_tracks:
@@ -51,16 +51,16 @@ def get_characteristics(tracks, hits, n, ratio):
     return reco_tracks, fake_tracks, duplicate_tracks, reco_dupl_tracks
 
 
-def calc_characteristics(tracks, hit_list, track_dict, secondary_track_list=None, min_length=9, ratio=0.5):
+def calc_characteristics(tracks, hit_list, track_dict, track_id_dict=None, min_length=9, ratio=0.5):
     # Get all lists of necessary data
     reco_track_list, fake_track_list, duplicate_track_list, reco_dupl_tracks = get_characteristics(tracks, hit_list, min_length, ratio)
     real_track_list = get_real_tracks(track_dict, min_length)
 
     # Remove secondary track id from data if in necessary
-    if secondary_track_list:
+    if track_id_dict:
         for info_list in [reco_track_list, duplicate_track_list, real_track_list]:
-            for track_id in secondary_track_list:
-                if track_id in info_list:
+            for track_id, is_primary in track_id_dict.items():
+                if track_id in info_list and not is_primary:
                     info_list.remove(track_id)
 
     # Save table of reco and not reco tracks
