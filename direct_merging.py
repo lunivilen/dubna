@@ -71,50 +71,29 @@ def direct_merging(tracks: list):
             hits[s] = tracks[i][j]
             tracks[i][j] = s
 
-    print("Starting the first stage of merging duplicates")
+    print("Starting merging duplicates")
     start = time()
     # The first merging stage
-    i = 0
-    while i < len(tracks):
-        j = i + 1
-        while j < len(tracks) and i < len(tracks):
-            if tracks[j][0] in tracks[i] and i != j:
-                merged_track, number = merge_tracks(tracks[i], tracks[j])
-                if number == 1:
-                    tracks[i] = merged_track
-                    tracks.pop(j)
-                    j -= 1
-                elif number == 2:
-                    tracks[j] = merged_track
-                    tracks.pop(i)
-                    i -= 1
-                    break
-            j += 1
-        i += 1
+    for step in range(2):
+        i = 0
+        while i < len(tracks):
+            j = i + 1
+            while j < len(tracks) and i < len(tracks):
+                if (tracks[j][0] in tracks[i] and i != j) or step:
+                    merged_track, number = merge_tracks(tracks[i], tracks[j])
+                    if number == 1:
+                        tracks[i] = merged_track
+                        tracks.pop(j)
+                        j -= 1
+                    elif number == 2:
+                        tracks[j] = merged_track
+                        tracks.pop(i)
+                        i -= 1
+                        break
+                j += 1
+            i += 1
 
-    print(f"The first stage of merging completed in {time() - start} seconds")
-    print("Starting the second stage of merging duplicates")
-    start = time()
-    i = 0
-    # The second merging stage
-    while i < len(tracks):
-        j = i + 1
-        while j < len(tracks) and i < len(tracks):
-            if i != j:
-                merged_track, number = merge_tracks(tracks[i], tracks[j])
-                if number == 1:
-                    tracks[i] = merged_track
-                    tracks.pop(j)
-                    j -= 1
-                elif number == 2:
-                    tracks[j] = merged_track
-                    tracks.pop(i)
-                    i -= 1
-                    break
-            j += 1
-        i += 1
-
-    print(f"The second stage of merging completed in {time() - start} seconds")
+    print(f"The stage of merging completed in {time() - start} seconds")
     print("Starting separate tracks")
     start = time()
 
