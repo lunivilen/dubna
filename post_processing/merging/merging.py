@@ -1,4 +1,4 @@
-from direct_merging import sort_hits_old
+from post_processing.merging.direct_merging import sort_hits_old
 from time import time
 import numpy as np
 import math

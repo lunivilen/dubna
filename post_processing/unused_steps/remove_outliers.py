@@ -1,4 +1,4 @@
-from merging import get_vector, get_vector_length
+from post_processing.merging.merging import get_vector, get_vector_length
 from time import time
 
 

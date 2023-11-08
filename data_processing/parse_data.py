@@ -1,5 +1,5 @@
+from post_processing.cleaning.direct_cleaning import sort_hits
 from collections import defaultdict
-from direct_cleaning import sort_hits
 import re
 
 

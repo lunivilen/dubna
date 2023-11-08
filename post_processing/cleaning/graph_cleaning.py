@@ -1,6 +1,6 @@
-from time import time
+from post_processing.cleaning.direct_cleaning import separate_tracks, sort_hits_old
 from collections import defaultdict
-from direct_cleaning import separate_tracks, sort_hits_old
+from time import time
 
 
 def count_tracks_intersections(all_tracks: dict):

@@ -1,8 +1,6 @@
-import re
+from data_processing.parse_data import get_hits_data_for_validation
 import pandas as pd
-
-from get_data import get_hits_data_for_validation
-
+import re
 
 def get_tracks_data(track_path, hit_path) -> list:
     hit_list = get_hits_data_for_validation(hit_path)
@@ -42,6 +40,7 @@ def get_tracks_data(track_path, hit_path) -> list:
             track_id += 1
     return tracks
 
+
 tracks = get_tracks_data("data/event_0_prototracks.txt", "data/event_0_space_points.txt")
 track_l = []
 chi_l = []
@@ -52,7 +51,7 @@ for track in tracks:
     chi = sum([hit[-1] for hit in track])
     num_points = len(track)
 
-    chi_len.append(chi/num_points)
+    chi_len.append(chi / num_points)
 
     track_l.append(i)
     chi_l.append(chi)

@@ -1,4 +1,4 @@
-from get_data import get_tracks_data
+from data_processing.parse_data import get_tracks_data
 import matplotlib.pyplot as plt
 import os
 
