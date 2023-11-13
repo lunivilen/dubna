@@ -3,7 +3,7 @@ from collections import defaultdict
 import re
 
 
-def get_tracks_data(track_path, hit_path) -> list:
+def get_tracks_data(track_path, hit_path, track_consist_of_hit_id=False) -> list:
     hit_list = get_hits_data_for_validation(hit_path)
     tracks = []
     track_id = 0
@@ -34,7 +34,7 @@ def get_tracks_data(track_path, hit_path) -> list:
                     hit_index = int(temp[0])
                     hit_params = hit_list[hit_index][:-1]
                     hit_params.insert(0, hit_index)
-                    tracks[track_id].append(hit_params)
+                    tracks[track_id].append(hit_index if track_consist_of_hit_id else hit_params)
                     temp = []
                     amount_characteristics = 0
             track_id += 1
