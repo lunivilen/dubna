@@ -5,13 +5,13 @@ import numpy as np
 
 def merge_tracks(track_one: list, track_two: list):
     similarity_factor = 0.5
-    temp_mas = np.concatenate((track_one, track_two))
-    unique = np.unique(temp_mas)
-    difference = temp_mas.shape[0] - unique.shape[0]
+    set_one, set_two = set(track_one), set(track_two)
+    difference = len(set_one & set_two)
+    unique = list(set_one | set_two)
     if difference / len(track_two) > similarity_factor:
-        return unique.tolist(), 1
+        return unique, 1
     elif difference / len(track_one) > similarity_factor:
-        return unique.tolist(), 2
+        return unique, 2
     else:
         return [], 0
 
