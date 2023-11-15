@@ -53,7 +53,8 @@ def get_characteristics(tracks, hits, n, ratio):
 
 def calc_characteristics(tracks, hit_list, track_dict, track_id_dict=None, min_length=9, ratio=0.5):
     # Get all lists of necessary data
-    reco_track_list, fake_track_list, duplicate_track_list, reco_dupl_tracks = get_characteristics(tracks, hit_list, min_length, ratio)
+    reco_track_list, fake_track_list, duplicate_track_list, reco_dupl_tracks = get_characteristics(tracks, hit_list,
+                                                                                                   min_length, ratio)
     real_track_list = get_real_tracks(track_dict, min_length)
 
     # Remove secondary track id from data if in necessary
@@ -69,12 +70,22 @@ def calc_characteristics(tracks, hit_list, track_dict, track_id_dict=None, min_l
     # Calc characteristics
     num_real_track = len(real_track_list)
     num_proto_track = len(tracks)
+    num_reco_track = len(reco_track_list)
+    num_fake_track = len(fake_track_list)
+    num_duplicate_track = len(duplicate_track_list)
+    num_reco_dupl_track = len(reco_dupl_tracks)
 
     characteristic_dict = {
-        "efficiency": len(reco_track_list) / num_real_track if num_real_track else 0,
-        "fake_rate": len(fake_track_list) / num_proto_track if num_proto_track else 0,
-        "duplication_rate": len(duplicate_track_list) / num_proto_track if num_real_track else 0,
-        "purity": len(reco_dupl_tracks) / num_proto_track if num_proto_track else 0
+        "efficiency": num_reco_track / num_real_track if num_real_track else 0,
+        "fake_rate": num_fake_track / num_proto_track if num_proto_track else 0,
+        "duplication_rate": num_duplicate_track / num_proto_track if num_real_track else 0,
+        "purity": num_reco_dupl_track / num_proto_track if num_proto_track else 0,
+        "num_recognize_track": num_reco_track,
+        "num_real_track": num_real_track,
+        "num_duplicate_track": num_duplicate_track,
+        "num_proto_track": num_proto_track,
+        "num_fake_track": num_fake_track,
+        "num_reco_dupl_track": num_reco_dupl_track
     }
     return characteristic_dict
 
