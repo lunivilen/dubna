@@ -12,16 +12,16 @@ import sys
 
 from visualizing import MainWindow
 
-result = [get_tracks_data("data/event_672_prototracks.txt", "data/event_672_points.txt")]
-track_dict = get_hits_data("data/event_672_points.txt")
-hit_list = get_hits_data_for_validation("data/event_672_points.txt")
-track_id_dict = get_track_id("data/event_0_trackIds.txt")
+result = [get_tracks_data("data/tracks_data/event_1_prototracks.txt", "data/tracks_data/event_1_space_points.txt")]
+hit_list = get_hits_data_for_validation("data/tracks_data/event_1_space_points.txt")
+track_id_dict = get_track_id("data/tracks_data/event_1_trackIds.txt")
+track_dict = get_hits_data("data/tracks_data/event_1_space_points.txt", track_id_dict)
 
-# result.append(direct_cleaning(deepcopy(result[0])))
-# result.append(direct_merging(deepcopy(result[0])))
-result.append(graph_merging(deepcopy(result[0])))
-# result.append(graph_cleaning(deepcopy(result[0])))
-result.append(merge_og(deepcopy(result[1]),
+# result.append(direct_cleaning(deepcopy(result[0])))  # + 3%
+# result.append(direct_merging(deepcopy(result[0])))  # + 1%
+# result.append(graph_merging(deepcopy(result[0])))  # + 0%
+# result.append(graph_cleaning(deepcopy(result[0])))  # + 0.5%
+result.append(merge_og(deepcopy(result[0]),
                        allowable_angle=160,
                        allowable_length=700,
                        allowable_distance=35))
@@ -37,6 +37,7 @@ for i in range(len(result)):
 
     for characteristic, value in characteristic_dict.items():
         print(f"{characteristic}: {value}\n")
+        break
 
     if len(result[i][0][0]) > 3:
         for track_id in range(len(result[i])):

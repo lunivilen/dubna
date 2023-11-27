@@ -78,7 +78,7 @@ def calc_characteristics(tracks, hit_list, track_dict, track_id_dict=None, min_l
     characteristic_dict = {
         "efficiency": num_reco_track / num_real_track if num_real_track else 0,
         "fake_rate": num_fake_track / num_proto_track if num_proto_track else 0,
-        "duplication_rate": num_duplicate_track / num_proto_track if num_real_track else 0,
+        "duplication_rate": num_duplicate_track / num_proto_track if num_proto_track else 0,
         "purity": num_reco_dupl_track / num_proto_track if num_proto_track else 0,
         "num_recognize_track": num_reco_track,
         "num_real_track": num_real_track,

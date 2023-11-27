@@ -99,7 +99,6 @@ def angle_sorting_both(tracks: list):
     return tracks_start, tracks_end
 
 def merge_og(tracks: list, allowable_angle=160, allowable_length=700, allowable_distance=35):
-    count = 0
     start = time()
     print("Starting real merging")
     i = 0
@@ -143,9 +142,9 @@ def merge_og(tracks: list, allowable_angle=160, allowable_length=700, allowable_
                 continue
 
             # Check distance between straight lines formed by tracks
-            distance = distance_to_line(np.array(tracks[i][0][0:3]),
-                                        np.array(tracks[i][1][0:3]),
-                                        np.array(tracks[j][-1][0:3]))
+            distance = distance_to_line(np.array(tracks[i][0][1:]),
+                                        np.array(tracks[i][1][1:]),
+                                        np.array(tracks[j][-1][1:]))
             if distance < allowable_distance:
                 tracks[i].extend(tracks[j])
                 tracks[i] = sort_hits_old(tracks[i])

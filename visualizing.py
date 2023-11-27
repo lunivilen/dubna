@@ -99,8 +99,8 @@ class MainWindow(gl.GLViewWidget):
                 if self.is_simulation_data_showed:
                     self.show_tracks(is_simulations_data=True)
 
-                if self.stage == len(self.tracks_data) - 1:
-                    colour = QColor(Qt.GlobalColor.darkYellow)
+                # if self.stage == len(self.tracks_data) - 1:
+                #     colour = QColor(Qt.GlobalColor.darkYellow)
 
             # Create graph object
             self.graph.setData(nodePositions=node_positions,

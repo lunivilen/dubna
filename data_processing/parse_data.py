@@ -41,7 +41,7 @@ def get_tracks_data(track_path, hit_path, track_consist_of_hit_id=False) -> list
     return tracks
 
 
-def get_hits_data(path_hits) -> dict:
+def get_hits_data(path_hits, track_id_dict=None) -> dict:
     hits = defaultdict(list)
     with open(path_hits) as f:
         for i in f:
@@ -51,7 +51,13 @@ def get_hits_data(path_hits) -> dict:
             hit = list(map(float, i.split(", ")))
             hits[int(hit[3])].append(hit[:3])
 
-    for id_track in hits.keys():
+    track_id_list = list(hits.keys())
+    for id_track in track_id_list:
+        # Удаляем вторичные треки
+        if track_id_dict:
+            if not track_id_dict[id_track]:
+                hits.pop(id_track)
+                continue
         hits[id_track] = sort_hits(hits[id_track])
     return hits
 

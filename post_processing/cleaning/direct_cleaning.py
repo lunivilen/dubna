@@ -5,15 +5,16 @@ import numpy as np
 
 def merge_tracks(track_one: list, track_two: list):
     similarity_factor = 0.5
-    set_one, set_two = set(track_one), set(track_two)
-    difference = len(set_one & set_two)
-    unique = list(set_one | set_two)
-    if difference / len(track_two) > similarity_factor:
-        return unique, 1
-    elif difference / len(track_one) > similarity_factor:
-        return unique, 2
+    temp_mas = np.concatenate((track_one, track_two))
+    unique = np.unique(temp_mas)
+    difference = temp_mas.shape[0] - unique.shape[0]
+    if difference / len(track_two) > similarity_factor or difference / len(track_one) > similarity_factor:
+        if len(track_one) > len(track_two):
+            return 1
+        else:
+            return 2
     else:
-        return [], 0
+        return 0
 
 
 def separate_tracks(track_one: list, track_two: list):
@@ -71,27 +72,46 @@ def direct_cleaning(tracks: list):
             hits[s] = tracks[i][j]
             tracks[i][j] = s
 
-    print("Starting merging duplicates")
+    print("Starting the first stage of merging duplicates")
     start = time()
     # The first merging stage
-    for step in range(2):
-        i = 0
-        while i < len(tracks):
-            j = i + 1
-            while j < len(tracks) and i < len(tracks):
-                if (tracks[j][0] in tracks[i] and i != j) or step:
-                    number = merge_tracks(tracks[i], tracks[j])
-                    if number == 1:
-                        tracks.pop(j)
-                        j -= 1
-                    elif number == 2:
-                        tracks.pop(i)
-                        i -= 1
-                        break
-                j += 1
-            i += 1
+    i = 0
+    while i < len(tracks):
+        j = i + 1
+        while j < len(tracks) and i < len(tracks):
+            if tracks[j][0] in tracks[i] and i != j:
+                number = merge_tracks(tracks[i], tracks[j])
+                if number == 1:
+                    tracks.pop(j)
+                    j -= 1
+                elif number == 2:
+                    tracks.pop(i)
+                    i -= 1
+                    break
+            j += 1
+        i += 1
 
-    print(f"The stage of cleaning completed in {time() - start} seconds")
+    print(f"The first stage of merging completed in {time() - start} seconds")
+    print("Starting the second stage of merging duplicates")
+    start = time()
+    i = 0
+    # The second merging stage
+    while i < len(tracks):
+        j = i + 1
+        while j < len(tracks) and i < len(tracks):
+            if i != j:
+                number = merge_tracks(tracks[i], tracks[j])
+                if number == 1:
+                    tracks.pop(j)
+                    j -= 1
+                elif number == 2:
+                    tracks.pop(i)
+                    i -= 1
+                    break
+            j += 1
+        i += 1
+
+    print(f"The second stage of merging completed in {time() - start} seconds")
     print("Starting separate tracks")
     start = time()
 
