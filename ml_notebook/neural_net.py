@@ -1,5 +1,5 @@
-import sys
-sys.path.append('../')
+# import sys
+# sys.path.append('../')
 import pandas as pd
 import tensorflow.keras
 from tensorflow.keras.models import Sequential
@@ -29,7 +29,7 @@ def create_model():
     model.add(Dense(1,activation='sigmoid',
                     kernel_initializer='random_normal'))
     model.compile(loss=margin_ranking_loss(),
-                optimizer=tensorflow.keras.optimizers.Adam(),
+                optimizer=tensorflow.keras.optimizers.legacy.Adam(),
                 metrics =['accuracy'])
     
     return model
@@ -45,14 +45,12 @@ def get_preds_df(event_number, indices, preds):
     return dct_preds
 
 # track_list = get_tracks_data('data\event_0_prototracks.txt', 'data\event_0_space_points.txt')
-def cluster_and_neural_net(track_list: list, tracks_for_nn, event_number, indices, hits=3):
+def cluster_and_neural_net(model, track_list: list, tracks_for_nn, event_number, indices, hits=3):
     '''
         dct_preds - выход нейросети
     '''
 
-    model = create_model()
-    checkpoint_path = 'checkpoint_dir/cp.ckpt'
-    model.load_weights(checkpoint_path)
+
     track_scores = model.predict(tracks_for_nn)
     dct_preds = get_preds_df(event_number, indices, track_scores)
     clusters = create_clusters(track_list, min_n_shared_hits=hits)
