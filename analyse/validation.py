@@ -67,18 +67,19 @@ def calc_characteristics(tracks,
 
     # Remove secondary track id from data if in necessary
     if track_id_dict:
-        for info_list in [reco_track_list, duplicate_track_list, fake_track_list, real_track_list]:
-            for track_id, is_primary in track_id_dict.items():
-                if track_id in info_list and not is_primary:
-                    info_list.remove(track_id)
+        for track_id, is_primary in track_id_dict.items():
+            if track_id in real_track_list and not is_primary:
+                real_track_list.remove(track_id)
 
     # Remove short real track from recognized data
+
     reco_track_list = list(filter(lambda x: x in real_track_list, reco_track_list))
-    duplicate_track_list = list(filter(lambda x: x in real_track_list, duplicate_track_list))
     fake_track_list = list(filter(lambda x: x in real_track_list, fake_track_list))
+    duplicate_track_list = list(filter(lambda x: x in real_track_list, duplicate_track_list))
+    reco_dupl_tracks = list(filter(lambda x: x in real_track_list, reco_dupl_tracks))
 
     # Save table of reco and not reco tracks
-    save_recognised_logo(reco_track_list, real_track_list)
+    # save_recognised_logo(reco_track_list, real_track_list)
 
     # Calc characteristics
     num_real_track = len(real_track_list)
