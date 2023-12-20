@@ -35,9 +35,6 @@ def get_characteristics(tracks, hits, n, ratio):
         # Find the most common real track id in reco track
         reco_track_id = max(tracks_hits[i], key=tracks_hits[i].count)
 
-        if tracks_hits[i].count(reco_track_id) / len(tracks_hits[i]) >= ratio:
-            reco_dupl_tracks.append(reco_track_id)
-
         # Check duplicates
         if reco_track_id in reco_tracks:
             duplicate_tracks.append(reco_track_id)
@@ -48,7 +45,7 @@ def get_characteristics(tracks, hits, n, ratio):
             reco_tracks.add(reco_track_id)
         else:
             fake_tracks.add(i)
-    return reco_tracks, fake_tracks, duplicate_tracks, reco_dupl_tracks
+    return reco_tracks, fake_tracks, duplicate_tracks
 
 
 def calc_characteristics(tracks,
@@ -59,7 +56,7 @@ def calc_characteristics(tracks,
                          min_length_proto=6,
                          ratio=0.5):
     # Get all lists of necessary data
-    reco_track_list, fake_track_list, duplicate_track_list, reco_dupl_tracks = get_characteristics(tracks,
+    reco_track_list, fake_track_list, duplicate_track_list = get_characteristics(tracks,
                                                                                                    hit_list,
                                                                                                    min_length_proto,
                                                                                                    ratio)
@@ -72,22 +69,20 @@ def calc_characteristics(tracks,
                 real_track_list.remove(track_id)
 
     # Remove short real track from recognized data
-
     reco_track_list = list(filter(lambda x: x in real_track_list, reco_track_list))
     fake_track_list = list(filter(lambda x: x in real_track_list, fake_track_list))
     duplicate_track_list = list(filter(lambda x: x in real_track_list, duplicate_track_list))
-    reco_dupl_tracks = list(filter(lambda x: x in real_track_list, reco_dupl_tracks))
 
     # Save table of reco and not reco tracks
     # save_recognised_logo(reco_track_list, real_track_list)
 
     # Calc characteristics
     num_real_track = len(real_track_list)
-    num_proto_track = len(tracks)
     num_reco_track = len(reco_track_list)
     num_fake_track = len(fake_track_list)
     num_duplicate_track = len(duplicate_track_list)
-    num_reco_dupl_track = len(reco_dupl_tracks)
+    num_reco_dupl_track = num_reco_track + num_duplicate_track
+    num_proto_track = num_reco_dupl_track + num_fake_track
 
     characteristic_dict = {
         "efficiency": num_reco_track / num_real_track if num_real_track else 0,
