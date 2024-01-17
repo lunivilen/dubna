@@ -24,7 +24,6 @@ def get_characteristics(tracks, hits, n, ratio):
     reco_tracks = set()
     fake_tracks = set()
     duplicate_tracks = []
-    reco_dupl_tracks = []
 
     # Replace hits in track with id of their real track
     tracks_hits = replace_hits_to_track_id(tracks, hits)
@@ -57,9 +56,9 @@ def calc_characteristics(tracks,
                          ratio=0.5):
     # Get all lists of necessary data
     reco_track_list, fake_track_list, duplicate_track_list = get_characteristics(tracks,
-                                                                                                   hit_list,
-                                                                                                   min_length_proto,
-                                                                                                   ratio)
+                                                                                 hit_list,
+                                                                                 min_length_proto,
+                                                                                 ratio)
     real_track_list = get_real_tracks(track_dict, min_length_real)
 
     # Remove secondary track id from data if in necessary

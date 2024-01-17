@@ -56,6 +56,7 @@ class MainWindow(gl.GLViewWidget):
         self.is_simulation_data_indexes_showed = False
         self.graph = gl.GLGraphItem()
         self.show_tracks()
+        self.setBackgroundColor(QColor(Qt.GlobalColor.lightGray))
 
     def keyPressEvent(self, key: QtGui.QKeyEvent) -> None:
         try:
@@ -106,7 +107,7 @@ class MainWindow(gl.GLViewWidget):
             self.graph.setData(nodePositions=node_positions,
                                edges=edges_index,
                                edgeColor=colour,
-                               nodeColor=QColor(Qt.GlobalColor.gray),
+                               nodeColor=(0, 0, 0, 1),
                                edgeWidth=2)
             self.addItem(self.graph)
 
