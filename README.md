@@ -1,12 +1,8 @@
-# Tracks visualization tool
+# Эксперимент NICA
 
-Required libraries: PyQt6, pyqtgraph,PyOpenGL, numpy, pandas, scipy
+Данный репозиторий относится к проекту MPD и содержит разработанное в ходе исследования программное обеспечение 
+для очистки данных, полученных после работы инструмента ACTS.
 
-When you run the main.py, event.txt must be located in the "data" folder,
- just like it is in the repository
-
-    event.py must contain data of the form:
-    1) One line - one track
-    2) Hits in the track follow each other without any separators
-    3) Hits characteristics have the following content - (multitraj-index, hit-index, x, y, z, phi, theta, q/p, t, chi2),
-    and are separated by a comma with a space
+Организация репозитория:
+1) Файл example.py содержит пример обработки данных одного события с помощью всех разработанных нами алгоритмов
+2) Папка analyse - содержит ПО для анализа работы алгоритмов

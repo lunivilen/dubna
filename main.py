@@ -1,35 +1,24 @@
-from copy import deepcopy
-
-from PyQt6.QtWidgets import QApplication
-from analyse.validation import calc_characteristics
 from post_processing.cleaning.graph_cleaning import graph_merging, graph_cleaning
-from data_processing.parse_data import *
-from post_processing.cleaning.direct_cleaning import direct_cleaning, sort_hits_old
+from post_processing.cleaning.direct_cleaning import direct_cleaning
 from post_processing.merging.direct_merging import direct_merging
-from post_processing.merging.merging import merge_og
-
+from analyse.validation import calc_characteristics
+from analyse.visualizing import MainWindow
+from data_processing.parse_data import *
+from PyQt6.QtWidgets import QApplication
+from copy import deepcopy
 import sys
 
-from visualizing import MainWindow
+result = {
+    "raw": get_tracks_data("data/tracks_data/event_0_prototracks.txt", "data/tracks_data/event_0_space_points.txt")}
 
-result = [get_tracks_data("data/tracks_data/event_1_prototracks.txt", "data/tracks_data/event_1_space_points.txt")]
-hit_list = get_hits_data_for_validation("data/tracks_data/event_1_space_points.txt")
-track_id_dict = get_track_id("data/tracks_data/event_1_trackIds.txt")
-track_dict = get_hits_data("data/tracks_data/event_1_space_points.txt", track_id_dict)
+hit_list = get_hits_data_for_validation("data/tracks_data/event_0_space_points.txt")
+track_id_dict = get_track_id("data/tracks_data/event_0_trackIds.txt")
+track_dict = get_hits_data("data/tracks_data/event_0_space_points.txt", track_id_dict)
 
-# result.append(direct_cleaning(deepcopy(result[0])))  # + 3%
-# result.append(direct_merging(deepcopy(result[0])))  # + 1%
-# result.append(graph_merging(deepcopy(result[0])))  # + 0%
-# result.append(graph_cleaning(deepcopy(result[0])))  # + 0.5%
-result.append(merge_og(deepcopy(result[0]),
-                       allowable_angle=160,
-                       allowable_length=700,
-                       allowable_distance=35))
-# result.append(remove_outliers(deepcopy(result[2])))
-# result.append(smoothing(deepcopy(result[3]), smooth_scale=150))
-# save_data(tracks)
-
-# result.append(get_tracks_data("data/event672_mpdroot.txt"))
+result["PWS"] = direct_cleaning(deepcopy(result.get("raw")))
+result["PWM"] = direct_merging(deepcopy(result.get("raw")))
+result["PGS"] = graph_merging(deepcopy(result.get("raw")))
+result["PGM"] = graph_cleaning(deepcopy(result.get("raw")))
 
 # Computation efficiency
 for i in range(len(result)):
@@ -37,8 +26,8 @@ for i in range(len(result)):
 
     for characteristic, value in characteristic_dict.items():
         print(f"{characteristic}: {value}\n")
-        break
 
+    # Remove hit indexes for visualizing
     if len(result[i][0][0]) > 3:
         for track_id in range(len(result[i])):
             for hit_id in range(len(result[i][track_id])):
